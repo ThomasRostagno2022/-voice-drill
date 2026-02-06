@@ -607,6 +607,44 @@ header h1 {
     gap: 12px;
 }
 
+/* Reminder Section */
+.reminder-section {
+    margin: 16px 0;
+    padding: 12px;
+    background: var(--gray-100);
+    border-radius: 8px;
+}
+
+.reminder-section label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.reminder-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.reminder-toggle input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+}
+
+.reminder-toggle input[type="time"] {
+    padding: 6px 10px;
+    border: 1px solid var(--gray-300);
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+#notification-status {
+    margin-top: 8px;
+    font-size: 12px;
+}
+
 /* Password Screen */
 .password-screen {
     position: fixed;

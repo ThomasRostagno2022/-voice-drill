@@ -218,7 +218,9 @@ async function transcribeAudio(audioBlob, fileExtension = 'webm') {
         formData.append('file', audioBlob, filename);
         formData.append('model', 'whisper-large-v3');
         formData.append('language', 'en');
-        formData.append('response_format', 'text');
+        formData.append('response_format', 'verbose_json');
+        // Prompt to preserve filler words and hesitations
+        formData.append('prompt', 'Transcribe exactly as spoken, including all filler words like um, uh, eh, ah, er, like, you know, basically, actually, so, right, I mean, kind of, sort of. Include hesitations, repetitions, and false starts. Do not clean up or polish the speech.');
 
         const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
             method: 'POST',
@@ -233,8 +235,9 @@ async function transcribeAudio(audioBlob, fileExtension = 'webm') {
             throw new Error(errorData.error?.message || `Transcription failed: ${response.status}`);
         }
 
-        transcript = await response.text();
-        transcript = transcript.trim();
+        const data = await response.json();
+        transcript = data.text ? data.text.trim() : '';
+        console.log('Transcription result:', transcript);
 
         if (transcript) {
             const durationSeconds = (Date.now() - startTime) / 1000;
@@ -622,14 +625,9 @@ async function speakCrispVersion() {
         return;
     }
 
-    const elevenLabsKey = localStorage.getItem('elevenlabs_api_key') || DEFAULT_ELEVENLABS_KEY;
-
-    // Use ElevenLabs if key is available
-    if (elevenLabsKey) {
-        await speakWithElevenLabs(text, elevenLabsKey);
-    } else {
-        speakWithBrowser(text);
-    }
+    // Use browser TTS for reliability on iOS
+    // ElevenLabs has compatibility issues with iOS Safari
+    speakWithBrowser(text);
 }
 
 // ElevenLabs TTS (natural voice)
@@ -926,8 +924,151 @@ if (metricSelect) {
     metricSelect.addEventListener('change', updateProgressChart);
 }
 
+// ========================
+// Daily Reminder System
+// ========================
+
+const reminderEnabled = document.getElementById('reminder-enabled');
+const reminderTime = document.getElementById('reminder-time');
+const enableNotificationsBtn = document.getElementById('enable-notifications');
+const notificationStatus = document.getElementById('notification-status');
+
+// Check notification permission status
+function updateNotificationStatus() {
+    if (!('Notification' in window)) {
+        if (notificationStatus) notificationStatus.textContent = 'Notifications not supported on this device';
+        return;
+    }
+
+    if (Notification.permission === 'granted') {
+        if (notificationStatus) notificationStatus.textContent = '✓ Notifications enabled';
+        if (enableNotificationsBtn) enableNotificationsBtn.style.display = 'none';
+    } else if (Notification.permission === 'denied') {
+        if (notificationStatus) notificationStatus.textContent = '✗ Notifications blocked - enable in browser settings';
+    } else {
+        if (notificationStatus) notificationStatus.textContent = 'Click button to enable notifications';
+    }
+}
+
+// Request notification permission
+async function requestNotificationPermission() {
+    if (!('Notification' in window)) {
+        alert('Notifications are not supported on this device/browser.');
+        return;
+    }
+
+    try {
+        const permission = await Notification.requestPermission();
+        updateNotificationStatus();
+
+        if (permission === 'granted') {
+            // Show test notification
+            new Notification('Voice Drill', {
+                body: 'Daily reminders enabled! You\'ll be reminded to practice.',
+                icon: 'icon-192.png'
+            });
+        }
+    } catch (err) {
+        console.error('Notification permission error:', err);
+    }
+}
+
+// Save reminder settings
+function saveReminderSettings() {
+    if (reminderEnabled && reminderTime) {
+        const settings = {
+            enabled: reminderEnabled.checked,
+            time: reminderTime.value
+        };
+        localStorage.setItem('voice_drill_reminder', JSON.stringify(settings));
+
+        if (settings.enabled) {
+            scheduleReminder(settings.time);
+        }
+    }
+}
+
+// Load reminder settings
+function loadReminderSettings() {
+    const saved = localStorage.getItem('voice_drill_reminder');
+    if (saved) {
+        const settings = JSON.parse(saved);
+        if (reminderEnabled) reminderEnabled.checked = settings.enabled;
+        if (reminderTime) reminderTime.value = settings.time || '09:00';
+    }
+    updateNotificationStatus();
+}
+
+// Schedule daily reminder check
+let reminderCheckInterval = null;
+
+function scheduleReminder(timeStr) {
+    // Clear existing interval
+    if (reminderCheckInterval) {
+        clearInterval(reminderCheckInterval);
+    }
+
+    // Check every minute if it's time to remind
+    reminderCheckInterval = setInterval(() => {
+        const settings = JSON.parse(localStorage.getItem('voice_drill_reminder') || '{}');
+        if (!settings.enabled) return;
+
+        const now = new Date();
+        const [hours, minutes] = settings.time.split(':').map(Number);
+
+        // Check if it's the right time (within the same minute)
+        if (now.getHours() === hours && now.getMinutes() === minutes) {
+            // Check if we already reminded today
+            const lastReminder = localStorage.getItem('voice_drill_last_reminder');
+            const today = now.toDateString();
+
+            if (lastReminder !== today) {
+                showReminder();
+                localStorage.setItem('voice_drill_last_reminder', today);
+            }
+        }
+    }, 60000); // Check every minute
+}
+
+// Show the reminder notification
+function showReminder() {
+    if (Notification.permission === 'granted') {
+        const notification = new Notification('🎤 Voice Drill Time!', {
+            body: 'Take 5 minutes to practice your communication skills.',
+            icon: 'icon-192.png',
+            tag: 'voice-drill-reminder',
+            requireInteraction: true
+        });
+
+        notification.onclick = () => {
+            window.focus();
+            notification.close();
+        };
+    }
+}
+
+// Event listeners for reminder settings
+if (enableNotificationsBtn) {
+    enableNotificationsBtn.addEventListener('click', requestNotificationPermission);
+}
+
+if (reminderEnabled) {
+    reminderEnabled.addEventListener('change', saveReminderSettings);
+}
+
+if (reminderTime) {
+    reminderTime.addEventListener('change', saveReminderSettings);
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     updateHistoryDisplay();
     updateProgressChart();
+    loadReminderSettings();
+
+    // Start reminder scheduler if enabled
+    const settings = JSON.parse(localStorage.getItem('voice_drill_reminder') || '{}');
+    if (settings.enabled) {
+        scheduleReminder(settings.time);
+    }
 });
