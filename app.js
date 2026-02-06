@@ -635,10 +635,10 @@ async function speakCrispVersion() {
 // ElevenLabs TTS (natural voice)
 async function speakWithElevenLabs(text, apiKey) {
     speakBtn.textContent = '⏳ Loading...';
+    isSpeaking = true;
 
     try {
         // Using "Rachel" voice - professional American female
-        // Other good options: "Drew" (male), "Clyde" (male), "Domi" (female)
         const voiceId = '21m00Tcm4TlvDq8ikWAM'; // Rachel
 
         const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
@@ -652,53 +652,83 @@ async function speakWithElevenLabs(text, apiKey) {
                 model_id: 'eleven_monolingual_v1',
                 voice_settings: {
                     stability: 0.5,
-                    similarity_boost: 0.75,
-                    style: 0.0,
-                    use_speaker_boost: true
+                    similarity_boost: 0.75
                 }
             })
         });
 
         if (!response.ok) {
-            const error = await response.json().catch(() => ({}));
-            console.error('ElevenLabs error:', error);
+            const errorText = await response.text().catch(() => 'Unknown error');
+            console.error('ElevenLabs error:', response.status, errorText);
+            isSpeaking = false;
+            speakBtn.textContent = '🔊 Listen';
             // Fallback to browser TTS
             speakWithBrowser(text);
             return;
         }
 
         const audioBlob = await response.blob();
+        console.log('Audio blob received:', audioBlob.size, 'bytes');
+
+        // For iOS compatibility, use a different approach
         const audioUrl = URL.createObjectURL(audioBlob);
+        audioPlayer = new Audio();
 
-        audioPlayer = new Audio(audioUrl);
+        // iOS requires user interaction - set up before playing
+        audioPlayer.preload = 'auto';
+        audioPlayer.src = audioUrl;
 
-        audioPlayer.onplay = () => {
-            isSpeaking = true;
-            speakBtn.textContent = '⏹️ Stop';
+        audioPlayer.oncanplaythrough = () => {
+            console.log('Audio ready to play');
+            audioPlayer.play().then(() => {
+                speakBtn.textContent = '⏹️ Stop';
+            }).catch(err => {
+                console.error('Play error:', err);
+                isSpeaking = false;
+                speakBtn.textContent = '🔊 Listen';
+                URL.revokeObjectURL(audioUrl);
+                speakWithBrowser(text);
+            });
         };
 
         audioPlayer.onended = () => {
+            console.log('Audio ended');
             isSpeaking = false;
             speakBtn.textContent = '🔊 Listen';
             URL.revokeObjectURL(audioUrl);
             audioPlayer = null;
         };
 
-        audioPlayer.onerror = () => {
+        audioPlayer.onerror = (e) => {
+            console.error('Audio error:', e);
             isSpeaking = false;
             speakBtn.textContent = '🔊 Listen';
             URL.revokeObjectURL(audioUrl);
             audioPlayer = null;
-            // Fallback to browser TTS
             speakWithBrowser(text);
         };
 
-        audioPlayer.play();
+        // Timeout fallback - if nothing happens in 10 seconds, use browser TTS
+        setTimeout(() => {
+            if (speakBtn.textContent === '⏳ Loading...') {
+                console.log('Timeout - falling back to browser TTS');
+                isSpeaking = false;
+                if (audioPlayer) {
+                    audioPlayer.pause();
+                    audioPlayer = null;
+                }
+                URL.revokeObjectURL(audioUrl);
+                speakWithBrowser(text);
+            }
+        }, 10000);
+
+        // Try to load immediately
+        audioPlayer.load();
 
     } catch (error) {
         console.error('ElevenLabs TTS error:', error);
+        isSpeaking = false;
         speakBtn.textContent = '🔊 Listen';
-        // Fallback to browser TTS
         speakWithBrowser(text);
     }
 }
