@@ -350,7 +350,7 @@ function showResults(text, durationSeconds) {
     saveToHistory(wordCount, fillerCount, pace, longestSentence);
 }
 
-// Groq API for rewrite
+// Groq API for rewrite with coaching feedback
 async function getRewrite() {
     const apiKey = localStorage.getItem('grok_api_key');
 
@@ -363,24 +363,51 @@ async function getRewrite() {
     rewriteLoading.classList.remove('hidden');
     rewriteError.classList.add('hidden');
 
-    const prompt = `You are a communication coach helping a French professional speak like a crisp American executive.
+    // Hide previous feedback
+    const feedbackSection = document.getElementById('coaching-feedback');
+    if (feedbackSection) feedbackSection.classList.add('hidden');
 
-Rewrite this interview answer following these rules:
-1. Cut all filler words (uh, um, like, you know, basically, actually, so, right)
-2. Reduce word count by 30-40%
-3. Lead with the headline - put the main point first
-4. Keep sentences under 20 words
-5. Use active voice
-6. Preserve all facts and meaning
-7. Sound natural, not robotic
+    const fillers = findFillers(transcript);
+    const longestSentence = getLongestSentence(transcript);
+    const wordCount = countWords(transcript);
+    const targetWordCount = currentQuestion ? currentQuestion.targetWords : 120;
 
-Original answer:
+    const prompt = `You are an executive communication coach helping a French professional sound like a polished American business leader.
+
+CONTEXT:
+- Question: "${currentQuestion ? currentQuestion.question : 'Interview question'}"
+- Target word count: ${targetWordCount} words
+- Their answer: ${wordCount} words
+- Fillers detected: ${fillers.length > 0 ? fillers.join(', ') : 'none'}
+- Longest sentence: ${longestSentence} words
+
+THEIR ORIGINAL ANSWER:
 "${transcript}"
 
-Question being answered:
-"${currentQuestion ? currentQuestion.question : 'Interview question'}"
+YOUR TASK:
+Provide TWO things in your response, clearly separated:
 
-Return ONLY the rewritten answer, nothing else.`;
+PART 1 - CRISP VERSION:
+Rewrite their answer following these principles:
+- Lead with the headline (main point first, then support)
+- Keep ALL important context, examples, and specifics - don't oversimplify
+- Remove filler words and verbal padding
+- Break run-on sentences (max 20 words each)
+- Use active voice and strong verbs
+- Maintain their authentic voice and personality
+- Target ${Math.round(targetWordCount * 0.9)}-${targetWordCount} words (preserve substance!)
+
+PART 2 - COACHING TIPS:
+Give 2-3 specific, actionable tips based on THEIR answer. Be specific about what they said vs what to say. Examples:
+- "You started with context. Try: '[Main point]. Here's why...' instead of 'So basically what happened was...'"
+- "Your 35-word sentence about X could be two punchy ones"
+- "Replace 'kind of' and 'sort of' with confident statements"
+
+FORMAT YOUR RESPONSE EXACTLY LIKE THIS:
+---CRISP---
+[The rewritten answer here]
+---TIPS---
+[2-3 bullet points with specific coaching tips]`;
 
     try {
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -394,12 +421,12 @@ Return ONLY the rewritten answer, nothing else.`;
                 messages: [
                     {
                         role: 'system',
-                        content: 'You are a communication coach helping professionals speak more concisely. Return only the rewritten text, no explanations.'
+                        content: 'You are an elite executive communication coach. You help non-native English speakers sound crisp, confident, and natural - like polished American executives. You preserve substance while cutting fluff. Always respond in the exact format requested.'
                     },
                     { role: 'user', content: prompt }
                 ],
                 temperature: 0.7,
-                max_tokens: 1024
+                max_tokens: 1500
             })
         });
 
@@ -410,16 +437,45 @@ Return ONLY the rewritten answer, nothing else.`;
         }
 
         const data = await response.json();
-        const rewrittenText = data.choices[0].message.content.trim();
+        const fullResponse = data.choices[0].message.content.trim();
 
-        // Show result
-        rewriteText.textContent = rewrittenText;
+        // Parse the response
+        let crispVersion = fullResponse;
+        let tips = '';
+
+        if (fullResponse.includes('---CRISP---') && fullResponse.includes('---TIPS---')) {
+            const crispMatch = fullResponse.match(/---CRISP---\s*([\s\S]*?)\s*---TIPS---/);
+            const tipsMatch = fullResponse.match(/---TIPS---\s*([\s\S]*?)$/);
+
+            if (crispMatch) crispVersion = crispMatch[1].trim();
+            if (tipsMatch) tips = tipsMatch[1].trim();
+        }
+
+        // Show crisp version
+        rewriteText.textContent = crispVersion;
         const originalWords = countWords(transcript);
-        const newWords = countWords(rewrittenText);
+        const newWords = countWords(crispVersion);
         const reduction = Math.round((1 - newWords / originalWords) * 100);
 
         rewriteWordCount.textContent = `${newWords} words`;
-        rewriteReduction.textContent = `${reduction}% shorter`;
+        rewriteReduction.textContent = reduction > 0 ? `${reduction}% shorter` : `${Math.abs(reduction)}% longer`;
+
+        // Show coaching tips if we got them
+        if (tips && feedbackSection) {
+            const feedbackText = document.getElementById('feedback-text');
+            if (feedbackText) {
+                // Format tips as bullet points
+                const formattedTips = tips
+                    .split('\n')
+                    .filter(line => line.trim())
+                    .map(line => line.replace(/^[-•*]\s*/, '').trim())
+                    .filter(line => line.length > 0)
+                    .map(tip => `<li>${tip}</li>`)
+                    .join('');
+                feedbackText.innerHTML = `<ul>${formattedTips}</ul>`;
+                feedbackSection.classList.remove('hidden');
+            }
+        }
 
         rewriteLoading.classList.add('hidden');
         rewriteResult.classList.remove('hidden');
@@ -453,6 +509,7 @@ function saveToHistory(wordCount, fillerCount, pace, longestSentence) {
 
     localStorage.setItem('voice_drill_history', JSON.stringify(history));
     updateHistoryDisplay();
+    updateProgressChart();
 }
 
 function updateHistoryDisplay() {
@@ -603,7 +660,133 @@ if (window.speechSynthesis) {
 
 speakBtn.addEventListener('click', speakCrispVersion);
 
+// Progress chart functionality
+function updateProgressChart() {
+    const history = JSON.parse(localStorage.getItem('voice_drill_history') || '[]');
+    const chartContainer = document.getElementById('progress-chart');
+    const progressStats = document.getElementById('progress-stats');
+    const metricSelect = document.getElementById('progress-metric');
+
+    if (history.length < 3) {
+        chartContainer.innerHTML = '<p class="empty-state">Complete 3+ drills to see your progress</p>';
+        progressStats.classList.add('hidden');
+        return;
+    }
+
+    progressStats.classList.remove('hidden');
+    const metric = metricSelect ? metricSelect.value : 'fillers';
+
+    // Get last 10 sessions (reversed to show oldest first)
+    const recentHistory = history.slice(0, 10).reverse();
+
+    // Get metric values and thresholds
+    const metricConfig = {
+        fillers: {
+            getValue: (h) => h.fillerCount,
+            goodMax: 2,
+            warnMax: 5,
+            label: 'fillers',
+            lowerIsBetter: true
+        },
+        pace: {
+            getValue: (h) => h.pace,
+            goodMin: 140,
+            goodMax: 170,
+            warnMin: 120,
+            warnMax: 180,
+            label: 'wpm',
+            lowerIsBetter: false
+        },
+        words: {
+            getValue: (h) => h.wordCount,
+            goodMax: 130,
+            warnMax: 160,
+            label: 'words',
+            lowerIsBetter: true
+        },
+        longest: {
+            getValue: (h) => h.longestSentence,
+            goodMax: 25,
+            warnMax: 35,
+            label: 'words',
+            lowerIsBetter: true
+        }
+    };
+
+    const config = metricConfig[metric];
+    const values = recentHistory.map(h => config.getValue(h));
+    const maxValue = Math.max(...values, 1);
+
+    // Calculate status for each value
+    const getStatus = (value) => {
+        if (metric === 'pace') {
+            if (value >= config.goodMin && value <= config.goodMax) return 'good';
+            if (value >= config.warnMin && value <= config.warnMax) return 'warning';
+            return 'bad';
+        }
+        if (value <= config.goodMax) return 'good';
+        if (value <= config.warnMax) return 'warning';
+        return 'bad';
+    };
+
+    // Build chart HTML
+    chartContainer.innerHTML = recentHistory.map((h, i) => {
+        const value = config.getValue(h);
+        const height = Math.max(10, (value / maxValue) * 100);
+        const status = getStatus(value);
+        const date = new Date(h.date);
+        const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+        return `
+            <div class="chart-bar-container">
+                <span class="chart-value">${value}</span>
+                <div class="chart-bar ${status}" style="height: ${height}px;"></div>
+                <span class="chart-label">${dateStr}</span>
+            </div>
+        `;
+    }).join('');
+
+    // Update stats
+    document.getElementById('total-sessions').textContent = history.length;
+
+    const avgFillers = (history.reduce((sum, h) => sum + h.fillerCount, 0) / history.length).toFixed(1);
+    document.getElementById('avg-fillers').textContent = avgFillers;
+
+    // Calculate trend (compare first half to second half of recent sessions)
+    if (recentHistory.length >= 4) {
+        const mid = Math.floor(recentHistory.length / 2);
+        const firstHalf = recentHistory.slice(0, mid);
+        const secondHalf = recentHistory.slice(mid);
+
+        const firstAvg = firstHalf.reduce((sum, h) => sum + config.getValue(h), 0) / firstHalf.length;
+        const secondAvg = secondHalf.reduce((sum, h) => sum + config.getValue(h), 0) / secondHalf.length;
+
+        const trendIndicator = document.getElementById('trend-indicator');
+        const improvement = config.lowerIsBetter ? firstAvg - secondAvg : secondAvg - firstAvg;
+
+        if (Math.abs(improvement) < 0.5) {
+            trendIndicator.textContent = '→ Stable';
+            trendIndicator.className = 'stat-value';
+        } else if (improvement > 0) {
+            trendIndicator.textContent = '↑ Improving';
+            trendIndicator.className = 'stat-value improving';
+        } else {
+            trendIndicator.textContent = '↓ Needs work';
+            trendIndicator.className = 'stat-value declining';
+        }
+    } else {
+        document.getElementById('trend-indicator').textContent = '--';
+    }
+}
+
+// Event listener for metric selector
+const metricSelect = document.getElementById('progress-metric');
+if (metricSelect) {
+    metricSelect.addEventListener('change', updateProgressChart);
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     updateHistoryDisplay();
+    updateProgressChart();
 });

@@ -121,6 +121,12 @@
                     </div>
                     <button id="speak-btn" class="btn-speak">🔊 Listen</button>
                 </div>
+
+                <!-- Coaching Feedback -->
+                <div id="coaching-feedback" class="coaching-feedback hidden">
+                    <h3>💡 What To Do Differently</h3>
+                    <div id="feedback-text" class="feedback-content"></div>
+                </div>
                 <div id="rewrite-error" class="hidden">
                     <p class="error-text"></p>
                 </div>
@@ -131,6 +137,36 @@
         <div class="actions">
             <button id="new-question-btn" class="btn-primary">New Question</button>
             <button id="reset-btn" class="btn-secondary hidden">Try Again</button>
+        </div>
+
+        <!-- Progress Section -->
+        <div id="progress-section" class="card">
+            <div class="progress-header">
+                <h3>📈 Your Progress</h3>
+                <select id="progress-metric" class="metric-select">
+                    <option value="fillers">Filler Words</option>
+                    <option value="pace">Speaking Pace</option>
+                    <option value="words">Word Count</option>
+                    <option value="longest">Sentence Length</option>
+                </select>
+            </div>
+            <div id="progress-chart" class="progress-chart">
+                <p class="empty-state">Complete 3+ drills to see your progress</p>
+            </div>
+            <div id="progress-stats" class="progress-stats hidden">
+                <div class="stat-item">
+                    <span class="stat-label">Sessions</span>
+                    <span id="total-sessions" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Avg Fillers</span>
+                    <span id="avg-fillers" class="stat-value">--</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Trend</span>
+                    <span id="trend-indicator" class="stat-value">--</span>
+                </div>
+            </div>
         </div>
 
         <!-- History Section -->

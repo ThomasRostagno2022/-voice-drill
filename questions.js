@@ -187,6 +187,266 @@ const QUESTIONS = [
         question: "How do you validate assumptions when you don't have historical data?",
         targetWords: 100,
         targetTime: 75
+    },
+
+    // ========================================
+    // COMMUNICATION SKILLS - Beyond Interviews
+    // ========================================
+
+    // Presentations & Public Speaking
+    {
+        category: "Presentation",
+        question: "You have 2 minutes to pitch a new initiative to your CEO. Go.",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Presentation",
+        question: "Explain a complex technical concept to a non-technical audience.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Presentation",
+        question: "You're presenting quarterly results. Revenue is down 15%. How do you frame it?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Presentation",
+        question: "Deliver the opening of a team all-hands meeting to energize the room.",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Presentation",
+        question: "Summarize a 50-page report in 90 seconds for an executive.",
+        targetWords: 90,
+        targetTime: 60
+    },
+
+    // Meetings & Discussions
+    {
+        category: "Meeting",
+        question: "You disagree with your manager's direction in a team meeting. What do you say?",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Meeting",
+        question: "A meeting is going off-track. How do you redirect it professionally?",
+        targetWords: 60,
+        targetTime: 45
+    },
+    {
+        category: "Meeting",
+        question: "You need to interrupt a long-winded colleague to make your point. How?",
+        targetWords: 50,
+        targetTime: 30
+    },
+    {
+        category: "Meeting",
+        question: "Someone asks for your opinion on a topic you're unprepared for. What do you say?",
+        targetWords: 70,
+        targetTime: 45
+    },
+    {
+        category: "Meeting",
+        question: "You're asked to give a quick status update on your project. 60 seconds.",
+        targetWords: 80,
+        targetTime: 60
+    },
+
+    // Networking & Small Talk
+    {
+        category: "Networking",
+        question: "Someone at a conference asks: 'So what do you do?' Give your elevator pitch.",
+        targetWords: 60,
+        targetTime: 45
+    },
+    {
+        category: "Networking",
+        question: "You meet a potential mentor. How do you introduce yourself and your goals?",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Networking",
+        question: "You're at a dinner with executives you don't know. Start a conversation.",
+        targetWords: 50,
+        targetTime: 30
+    },
+    {
+        category: "Networking",
+        question: "Someone you admire asks about your career journey. Tell your story.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Networking",
+        question: "You want to reconnect with someone you haven't spoken to in years. What do you say?",
+        targetWords: 60,
+        targetTime: 45
+    },
+
+    // Difficult Conversations
+    {
+        category: "Difficult Conversation",
+        question: "You need to tell a direct report their performance is not meeting expectations.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Difficult Conversation",
+        question: "A client is unhappy with a deliverable. How do you address their concerns?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Difficult Conversation",
+        question: "You have to say no to a request from a senior leader. What do you say?",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Difficult Conversation",
+        question: "A colleague takes credit for your work. How do you address it?",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Difficult Conversation",
+        question: "You made a mistake that cost the company money. How do you own it?",
+        targetWords: 100,
+        targetTime: 75
+    },
+
+    // Persuasion & Influence
+    {
+        category: "Persuasion",
+        question: "Convince your team to adopt a new tool they're resistant to.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Persuasion",
+        question: "You need a budget increase. Make your case to the CFO.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Persuasion",
+        question: "A stakeholder wants to go in a direction you think is wrong. Persuade them.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Persuasion",
+        question: "You need cross-functional teams to prioritize your project. How do you pitch it?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Persuasion",
+        question: "Convince a skeptical audience that AI will benefit their workflow.",
+        targetWords: 100,
+        targetTime: 75
+    },
+
+    // Explanations & Teaching
+    {
+        category: "Explanation",
+        question: "Explain what your company does to someone at a party.",
+        targetWords: 60,
+        targetTime: 45
+    },
+    {
+        category: "Explanation",
+        question: "A new hire asks you to explain how your team fits into the organization.",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Explanation",
+        question: "Break down a recent business decision and the reasoning behind it.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Explanation",
+        question: "Explain the difference between two similar concepts in your field.",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Explanation",
+        question: "Describe a process you follow and why each step matters.",
+        targetWords: 100,
+        targetTime: 75
+    },
+
+    // Storytelling
+    {
+        category: "Storytelling",
+        question: "Tell a story about a time something didn't go as planned but worked out.",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Storytelling",
+        question: "Share an experience that shaped how you approach your work.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Storytelling",
+        question: "Describe a customer success story that demonstrates your product's value.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Storytelling",
+        question: "Tell a brief story to illustrate the importance of attention to detail.",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Storytelling",
+        question: "Share a lesson you learned from a mentor or leader you admire.",
+        targetWords: 100,
+        targetTime: 75
+    },
+
+    // Quick Responses
+    {
+        category: "Quick Response",
+        question: "Someone says 'I don't think that's a good idea.' Respond constructively.",
+        targetWords: 50,
+        targetTime: 30
+    },
+    {
+        category: "Quick Response",
+        question: "'Why should we trust you with this project?' Answer confidently.",
+        targetWords: 60,
+        targetTime: 45
+    },
+    {
+        category: "Quick Response",
+        question: "'What makes you different from others in your field?' Answer.",
+        targetWords: 60,
+        targetTime: 45
+    },
+    {
+        category: "Quick Response",
+        question: "'Can you do this by Friday?' (It's aggressive). How do you respond?",
+        targetWords: 50,
+        targetTime: 30
+    },
+    {
+        category: "Quick Response",
+        question: "'I've heard mixed reviews about this approach.' Address the concern.",
+        targetWords: 60,
+        targetTime: 45
     }
 ];
 
