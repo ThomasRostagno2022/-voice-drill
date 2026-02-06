@@ -58,40 +58,88 @@ function initSpeechRecognition() {
     }
 
     recognition = new SpeechRecognition();
-    recognition.continuous = true;
+    recognition.continuous = false; // Safari works better with continuous=false
     recognition.interimResults = true;
     recognition.lang = 'en-US';
+    recognition.maxAlternatives = 1;
+
+    let finalResults = '';
 
     recognition.onresult = (event) => {
-        let finalTranscript = '';
         let interimTranscript = '';
 
-        for (let i = 0; i < event.results.length; i++) {
-            if (event.results[i].isFinal) {
-                finalTranscript += event.results[i][0].transcript;
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const result = event.results[i];
+            if (result.isFinal) {
+                finalResults += result[0].transcript + ' ';
             } else {
-                interimTranscript += event.results[i][0].transcript;
+                interimTranscript += result[0].transcript;
             }
         }
 
-        transcript = finalTranscript || interimTranscript;
+        transcript = (finalResults + interimTranscript).trim();
+
+        // Show live transcript for feedback
+        if (transcript && transcriptText) {
+            transcriptText.textContent = transcript + '...';
+        }
     };
 
     recognition.onerror = (event) => {
         console.error('Speech recognition error:', event.error);
         if (event.error === 'not-allowed') {
-            alert('Microphone access denied. Please enable microphone permissions in your browser settings.');
+            alert('Microphone access denied. Please enable microphone permissions in Settings > Safari > Microphone.');
+        } else if (event.error === 'no-speech') {
+            // This is common on iOS - just restart if still recording
+            if (isRecording) {
+                try {
+                    recognition.start();
+                } catch (e) {
+                    console.log('Restarting recognition...');
+                }
+            }
         }
     };
 
     recognition.onend = () => {
+        // Safari stops recognition frequently - restart if still recording
         if (isRecording) {
-            // Restart if still supposed to be recording
-            recognition.start();
+            try {
+                setTimeout(() => {
+                    if (isRecording) {
+                        recognition.start();
+                    }
+                }, 100);
+            } catch (e) {
+                console.log('Recognition restart error:', e);
+            }
         }
     };
 
+    recognition.onaudiostart = () => {
+        console.log('Audio capturing started');
+    };
+
+    recognition.onspeechstart = () => {
+        console.log('Speech detected');
+    };
+
+    // Reset final results when starting fresh
+    recognition.onstart = () => {
+        console.log('Recognition started');
+    };
+
     return true;
+}
+
+// Reset recognition state
+function resetRecognition() {
+    if (recognition) {
+        try {
+            recognition.stop();
+        } catch (e) {}
+    }
+    recognition = null;
 }
 
 // Timer functions
@@ -127,7 +175,9 @@ function updateTimerDisplay() {
 
 // Recording functions
 function startRecording() {
-    if (!recognition && !initSpeechRecognition()) {
+    // Always create fresh recognition instance for iOS Safari
+    resetRecognition();
+    if (!initSpeechRecognition()) {
         return;
     }
 
@@ -140,8 +190,23 @@ function startRecording() {
     resultsSection.classList.add('hidden');
     resetBtn.classList.add('hidden');
 
+    // Show recording feedback
+    if (transcriptText) {
+        transcriptText.textContent = 'Listening...';
+        resultsSection.classList.remove('hidden');
+    }
+
     startTimer();
-    recognition.start();
+
+    // Small delay helps iOS Safari
+    setTimeout(() => {
+        try {
+            recognition.start();
+        } catch (e) {
+            console.error('Failed to start recognition:', e);
+            alert('Could not start microphone. Please refresh and try again.');
+        }
+    }, 100);
 }
 
 function stopRecording() {
