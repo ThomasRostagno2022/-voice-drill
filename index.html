@@ -24,6 +24,33 @@
     </div>
 
     <div class="container hidden" id="main-app">
+        <!-- Weekly Debrief Modal -->
+        <div id="weekly-debrief-modal" class="modal hidden">
+            <div class="modal-content debrief-modal">
+                <h2>📊 Weekly Debrief</h2>
+                <p id="debrief-summary" class="debrief-summary"></p>
+
+                <div id="debrief-trend" class="debrief-trend hidden"></div>
+
+                <div class="debrief-section">
+                    <h3>💪 What You Did Well</h3>
+                    <ul id="debrief-strengths"></ul>
+                </div>
+
+                <div class="debrief-section">
+                    <h3>🎯 What To Work On</h3>
+                    <ul id="debrief-improvements"></ul>
+                </div>
+
+                <div class="debrief-focus">
+                    <h3>🔥 This Week's Focus</h3>
+                    <p id="debrief-focus"></p>
+                </div>
+
+                <button id="close-debrief" class="btn-primary">Got It!</button>
+            </div>
+        </div>
+
         <!-- Settings Modal -->
         <div id="settings-modal" class="modal hidden">
             <div class="modal-content">
@@ -156,6 +183,7 @@
         <div id="progress-section" class="card">
             <div class="progress-header">
                 <h3>📈 Your Progress</h3>
+                <button id="show-debrief-btn" class="debrief-btn" title="Weekly Summary">📊</button>
                 <select id="progress-metric" class="metric-select">
                     <option value="fillers">Filler Words</option>
                     <option value="pace">Speaking Pace</option>

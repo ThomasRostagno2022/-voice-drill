@@ -1,5 +1,7 @@
 const QUESTIONS = [
-    // Behavioral - Core Stories
+    // ========================================
+    // BEHAVIORAL - Core Stories (15 questions)
+    // ========================================
     {
         category: "Behavioral",
         question: "Tell me about yourself and your background.",
@@ -60,8 +62,40 @@ const QUESTIONS = [
         targetWords: 100,
         targetTime: 75
     },
+    {
+        category: "Behavioral",
+        question: "Tell me about a time you had to learn something new quickly to solve a problem.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Behavioral",
+        question: "Describe a time when you received critical feedback. How did you respond?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Behavioral",
+        question: "Tell me about a time you went above and beyond for a customer or stakeholder.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Behavioral",
+        question: "Describe a situation where you had to work with someone difficult.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Behavioral",
+        question: "Tell me about a time you took initiative without being asked.",
+        targetWords: 100,
+        targetTime: 75
+    },
 
-    // Motivation & Fit
+    // ========================================
+    // MOTIVATION & FIT (10 questions)
+    // ========================================
     {
         category: "Motivation",
         question: "Why this company? Why this role? Why now?",
@@ -92,8 +126,40 @@ const QUESTIONS = [
         targetWords: 80,
         targetTime: 60
     },
+    {
+        category: "Motivation",
+        question: "What's the most important thing for you in your next role?",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Motivation",
+        question: "What would make you leave a job?",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Motivation",
+        question: "How do you stay motivated when work gets repetitive?",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Motivation",
+        question: "What's a professional accomplishment you're still working toward?",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Motivation",
+        question: "How do you define success in your career?",
+        targetWords: 80,
+        targetTime: 60
+    },
 
-    // GTM Strategy
+    // ========================================
+    // GTM STRATEGY (12 questions)
+    // ========================================
     {
         category: "GTM Strategy",
         question: "How would you diagnose a GTM problem you've never seen before?",
@@ -136,8 +202,40 @@ const QUESTIONS = [
         targetWords: 100,
         targetTime: 75
     },
+    {
+        category: "GTM Strategy",
+        question: "How do you think about pricing strategy for a new market?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "GTM Strategy",
+        question: "What metrics matter most when evaluating GTM effectiveness?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "GTM Strategy",
+        question: "How would you approach entering a new geographic market?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "GTM Strategy",
+        question: "How do you balance short-term revenue vs. long-term market positioning?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "GTM Strategy",
+        question: "What's your framework for competitive positioning?",
+        targetWords: 100,
+        targetTime: 75
+    },
 
-    // Situational
+    // ========================================
+    // SITUATIONAL (12 questions)
+    // ========================================
     {
         category: "Situational",
         question: "A Regional VP says 60% of rep time goes to 15% of revenue. What do you do?",
@@ -174,8 +272,46 @@ const QUESTIONS = [
         targetWords: 100,
         targetTime: 75
     },
+    {
+        category: "Situational",
+        question: "Your analysis shows the sales team is underperforming. How do you present this?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Situational",
+        question: "A project deadline moved up by 2 weeks. What do you do?",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Situational",
+        question: "Two executives give you conflicting priorities. How do you handle it?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Situational",
+        question: "Your recommendation was implemented but isn't working. What now?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Situational",
+        question: "A key team member resigns mid-project. How do you adapt?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Situational",
+        question: "You discover a significant error in a report that's already been shared. What do you do?",
+        targetWords: 100,
+        targetTime: 75
+    },
 
-    // Data & Analysis
+    // ========================================
+    // DATA & ANALYSIS (10 questions)
+    // ========================================
     {
         category: "Data & Analysis",
         question: "Tell me about building a model with bad or incomplete data.",
@@ -188,12 +324,58 @@ const QUESTIONS = [
         targetWords: 100,
         targetTime: 75
     },
+    {
+        category: "Data & Analysis",
+        question: "Walk me through how you'd build a sales forecasting model.",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Data & Analysis",
+        question: "How do you explain a complex analysis to a non-technical stakeholder?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Data & Analysis",
+        question: "What's your process for identifying the root cause of a business problem?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Data & Analysis",
+        question: "How do you know when you have enough data to make a recommendation?",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Data & Analysis",
+        question: "Describe a time when data told a different story than expected.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Data & Analysis",
+        question: "How do you balance speed vs. accuracy in your analysis?",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Data & Analysis",
+        question: "What's your approach to presenting data that contradicts popular belief?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Data & Analysis",
+        question: "How do you ensure your analysis is actionable, not just informative?",
+        targetWords: 100,
+        targetTime: 75
+    },
 
     // ========================================
-    // COMMUNICATION SKILLS - Beyond Interviews
+    // PRESENTATIONS & PUBLIC SPEAKING (10 questions)
     // ========================================
-
-    // Presentations & Public Speaking
     {
         category: "Presentation",
         question: "You have 2 minutes to pitch a new initiative to your CEO. Go.",
@@ -224,8 +406,40 @@ const QUESTIONS = [
         targetWords: 90,
         targetTime: 60
     },
+    {
+        category: "Presentation",
+        question: "Present a controversial recommendation to a skeptical audience.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Presentation",
+        question: "You're asked to present without your slides. Give the key points.",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Presentation",
+        question: "Introduce a new team member to the company during an all-hands.",
+        targetWords: 60,
+        targetTime: 45
+    },
+    {
+        category: "Presentation",
+        question: "Present three options for solving a problem with your recommendation.",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Presentation",
+        question: "Kick off a project meeting by explaining the goals and timeline.",
+        targetWords: 80,
+        targetTime: 60
+    },
 
-    // Meetings & Discussions
+    // ========================================
+    // MEETINGS & DISCUSSIONS (10 questions)
+    // ========================================
     {
         category: "Meeting",
         question: "You disagree with your manager's direction in a team meeting. What do you say?",
@@ -256,8 +470,40 @@ const QUESTIONS = [
         targetWords: 80,
         targetTime: 60
     },
+    {
+        category: "Meeting",
+        question: "How do you facilitate a brainstorming session effectively?",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Meeting",
+        question: "Someone in the meeting is dominating the conversation. How do you handle it?",
+        targetWords: 60,
+        targetTime: 45
+    },
+    {
+        category: "Meeting",
+        question: "You need to wrap up a meeting that's running over time. What do you say?",
+        targetWords: 50,
+        targetTime: 30
+    },
+    {
+        category: "Meeting",
+        question: "How do you get a quiet team member to share their perspective?",
+        targetWords: 60,
+        targetTime: 45
+    },
+    {
+        category: "Meeting",
+        question: "You join a meeting late. How do you catch up without disrupting?",
+        targetWords: 50,
+        targetTime: 30
+    },
 
-    // Networking & Small Talk
+    // ========================================
+    // NETWORKING & SMALL TALK (10 questions)
+    // ========================================
     {
         category: "Networking",
         question: "Someone at a conference asks: 'So what do you do?' Give your elevator pitch.",
@@ -288,8 +534,40 @@ const QUESTIONS = [
         targetWords: 60,
         targetTime: 45
     },
+    {
+        category: "Networking",
+        question: "How do you gracefully exit a conversation at a networking event?",
+        targetWords: 50,
+        targetTime: 30
+    },
+    {
+        category: "Networking",
+        question: "You meet someone in a completely different industry. Find common ground.",
+        targetWords: 60,
+        targetTime: 45
+    },
+    {
+        category: "Networking",
+        question: "Ask for advice from a senior leader you just met without seeming presumptuous.",
+        targetWords: 60,
+        targetTime: 45
+    },
+    {
+        category: "Networking",
+        question: "Someone asks what you're working on. Make it sound interesting.",
+        targetWords: 70,
+        targetTime: 45
+    },
+    {
+        category: "Networking",
+        question: "Follow up with someone you met briefly. What's your message?",
+        targetWords: 50,
+        targetTime: 30
+    },
 
-    // Difficult Conversations
+    // ========================================
+    // DIFFICULT CONVERSATIONS (10 questions)
+    // ========================================
     {
         category: "Difficult Conversation",
         question: "You need to tell a direct report their performance is not meeting expectations.",
@@ -320,8 +598,40 @@ const QUESTIONS = [
         targetWords: 100,
         targetTime: 75
     },
+    {
+        category: "Difficult Conversation",
+        question: "You need to ask for a raise. Make your case.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Difficult Conversation",
+        question: "A team member's behavior is affecting team morale. Address it.",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Difficult Conversation",
+        question: "You disagree with a decision that's already been made. How do you voice concerns?",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Difficult Conversation",
+        question: "A vendor isn't delivering as promised. How do you address it?",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Difficult Conversation",
+        question: "You need to deliver constructive criticism to a peer. How do you approach it?",
+        targetWords: 80,
+        targetTime: 60
+    },
 
-    // Persuasion & Influence
+    // ========================================
+    // PERSUASION & INFLUENCE (10 questions)
+    // ========================================
     {
         category: "Persuasion",
         question: "Convince your team to adopt a new tool they're resistant to.",
@@ -352,8 +662,40 @@ const QUESTIONS = [
         targetWords: 100,
         targetTime: 75
     },
+    {
+        category: "Persuasion",
+        question: "Pitch a risky idea that could have high reward.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Persuasion",
+        question: "Convince your manager to let you work on a passion project.",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Persuasion",
+        question: "You need to get buy-in from someone who has rejected this idea before.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Persuasion",
+        question: "Persuade a customer to expand their contract with you.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Persuasion",
+        question: "Convince leadership to invest in a long-term initiative with delayed ROI.",
+        targetWords: 100,
+        targetTime: 75
+    },
 
-    // Explanations & Teaching
+    // ========================================
+    // EXPLANATIONS & TEACHING (8 questions)
+    // ========================================
     {
         category: "Explanation",
         question: "Explain what your company does to someone at a party.",
@@ -384,8 +726,28 @@ const QUESTIONS = [
         targetWords: 100,
         targetTime: 75
     },
+    {
+        category: "Explanation",
+        question: "Explain a trend in your industry to someone outside of it.",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Explanation",
+        question: "Teach a colleague a skill you're good at in 90 seconds.",
+        targetWords: 90,
+        targetTime: 60
+    },
+    {
+        category: "Explanation",
+        question: "Explain why a project failed without placing blame.",
+        targetWords: 80,
+        targetTime: 60
+    },
 
-    // Storytelling
+    // ========================================
+    // STORYTELLING (8 questions)
+    // ========================================
     {
         category: "Storytelling",
         question: "Tell a story about a time something didn't go as planned but worked out.",
@@ -416,8 +778,28 @@ const QUESTIONS = [
         targetWords: 100,
         targetTime: 75
     },
+    {
+        category: "Storytelling",
+        question: "Tell a story about overcoming a significant obstacle in your career.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Storytelling",
+        question: "Share a story that demonstrates your problem-solving approach.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Storytelling",
+        question: "Tell a story about a team accomplishment and your role in it.",
+        targetWords: 100,
+        targetTime: 75
+    },
 
-    // Quick Responses
+    // ========================================
+    // QUICK RESPONSES (10 questions)
+    // ========================================
     {
         category: "Quick Response",
         question: "Someone says 'I don't think that's a good idea.' Respond constructively.",
@@ -447,15 +829,50 @@ const QUESTIONS = [
         question: "'I've heard mixed reviews about this approach.' Address the concern.",
         targetWords: 60,
         targetTime: 45
+    },
+    {
+        category: "Quick Response",
+        question: "'Why didn't this work?' Respond without being defensive.",
+        targetWords: 60,
+        targetTime: 45
+    },
+    {
+        category: "Quick Response",
+        question: "'What's your biggest weakness?' Answer authentically.",
+        targetWords: 60,
+        targetTime: 45
+    },
+    {
+        category: "Quick Response",
+        question: "'We've always done it this way.' Challenge the status quo respectfully.",
+        targetWords: 60,
+        targetTime: 45
+    },
+    {
+        category: "Quick Response",
+        question: "'That's not my job.' Your colleague says this. How do you respond?",
+        targetWords: 50,
+        targetTime: 30
+    },
+    {
+        category: "Quick Response",
+        question: "'We don't have budget for that.' Find another path forward.",
+        targetWords: 60,
+        targetTime: 45
     }
 ];
 
-// Filler words to detect
+// Filler words to detect (including French-influenced hesitations)
 const FILLER_WORDS = [
-    'uh', 'um', 'eh', 'ah', 'er',
+    // Classic hesitation sounds
+    'uh', 'um', 'eh', 'ah', 'er', 'euh', 'mh', 'hmm', 'hm', 'mm',
+    // Verbal fillers
     'like', 'you know', 'basically', 'actually', 'literally',
     'right', 'so', 'well', 'i mean', 'kind of', 'sort of',
     'honestly', 'obviously', 'definitely', 'probably',
     'just', 'really', 'very', 'stuff', 'things',
-    'anyway', 'anyways'
+    'anyway', 'anyways',
+    // Additional fillers
+    'okay so', 'and so', 'but like', 'so like', 'i think', 'i guess',
+    'in fact', 'to be honest', 'at the end of the day'
 ];

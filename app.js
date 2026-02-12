@@ -216,11 +216,11 @@ async function transcribeAudio(audioBlob, fileExtension = 'webm') {
 
         const formData = new FormData();
         formData.append('file', audioBlob, filename);
-        formData.append('model', 'whisper-large-v3');
+        formData.append('model', 'whisper-large-v3-turbo');
         formData.append('language', 'en');
         formData.append('response_format', 'verbose_json');
-        // Prompt to preserve filler words and hesitations
-        formData.append('prompt', 'Transcribe exactly as spoken, including all filler words like um, uh, eh, ah, er, like, you know, basically, actually, so, right, I mean, kind of, sort of. Include hesitations, repetitions, and false starts. Do not clean up or polish the speech.');
+        // Include filler sounds in the vocabulary prompt
+        formData.append('prompt', 'Umm, uhh, euh, ehh, ahh, hmm, mhm, uh-huh, like, you know, basically, so, I mean, kind of, sort of, actually, right, well.');
 
         const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
             method: 'POST',
@@ -236,12 +236,23 @@ async function transcribeAudio(audioBlob, fileExtension = 'webm') {
         }
 
         const data = await response.json();
-        transcript = data.text ? data.text.trim() : '';
-        console.log('Transcription result:', transcript);
+        let rawTranscript = data.text ? data.text.trim() : '';
+        console.log('Raw transcription:', rawTranscript);
+        console.log('Segments:', data.segments);
 
-        if (transcript) {
+        if (rawTranscript) {
             const durationSeconds = (Date.now() - startTime) / 1000;
-            showResults(transcript, durationSeconds);
+
+            // Analyze pauses from segments to detect likely hesitation points
+            const pauseInfo = analyzePauses(data.segments || []);
+
+            // Store pause info for display
+            window.lastPauseInfo = pauseInfo;
+
+            // Mark verbal fillers in the transcript
+            transcript = markVerbalFillers(rawTranscript);
+
+            showResults(transcript, durationSeconds, pauseInfo);
         } else {
             showStatus('No speech detected. Please speak louder and try again.');
         }
@@ -250,6 +261,71 @@ async function transcribeAudio(audioBlob, fileExtension = 'webm') {
         console.error('Transcription error:', error);
         showStatus('Transcription failed: ' + error.message);
     }
+}
+
+// Analyze segment timings for pauses (hesitations that Whisper removed)
+function analyzePauses(segments) {
+    const pauses = [];
+    if (segments && segments.length > 1) {
+        for (let i = 1; i < segments.length; i++) {
+            const gap = segments[i].start - segments[i - 1].end;
+            if (gap > 0.4) { // Gap longer than 400ms indicates hesitation
+                pauses.push({
+                    afterText: segments[i - 1].text?.trim().split(' ').slice(-3).join(' ') || '',
+                    beforeText: segments[i].text?.trim().split(' ').slice(0, 3).join(' ') || '',
+                    duration: gap
+                });
+            }
+        }
+    }
+    return pauses;
+}
+
+// Mark verbal filler words in the transcript
+function markVerbalFillers(text) {
+    // Words that are ALWAYS fillers (hesitation sounds)
+    const alwaysFillers = ['um', 'umm', 'uh', 'uhh', 'euh', 'eh', 'ah', 'ahh', 'er', 'err', 'hmm', 'hm', 'mm', 'mhm', 'uh-huh'];
+
+    // Mark hesitation sounds
+    let marked = text;
+    alwaysFillers.forEach(filler => {
+        const regex = new RegExp(`\\b(${filler})\\b`, 'gi');
+        marked = marked.replace(regex, '[$1]');
+    });
+
+    // Mark contextual fillers (only when used as fillers, not meaning)
+    // "like" as filler: ", like," or "like," at start, or "...like..."
+    marked = marked.replace(/,\s*like\s*,/gi, ', [like],');
+    marked = marked.replace(/^like,\s*/gi, '[like], ');
+
+    // "you know" as filler: ", you know,"
+    marked = marked.replace(/,\s*you know\s*,/gi, ', [you know],');
+    marked = marked.replace(/,\s*you know\./gi, ', [you know].');
+
+    // "basically" at start of sentences or after comma
+    marked = marked.replace(/(^|[.!?]\s*)basically\s+/gi, '$1[basically] ');
+    marked = marked.replace(/,\s*basically\s+/gi, ', [basically] ');
+
+    // "so" at the very start
+    marked = marked.replace(/^so\s+/gi, '[so] ');
+    marked = marked.replace(/(^|[.!?]\s*)so,?\s+/gi, '$1[so] ');
+
+    // "I mean" as filler
+    marked = marked.replace(/,\s*I mean\s*,/gi, ', [I mean],');
+    marked = marked.replace(/^I mean\s*,/gi, '[I mean],');
+
+    // "kind of" / "sort of"
+    marked = marked.replace(/\bkind of\b/gi, '[kind of]');
+    marked = marked.replace(/\bsort of\b/gi, '[sort of]');
+
+    // "actually" at start
+    marked = marked.replace(/(^|[.!?]\s*)actually\s*,?\s*/gi, '$1[actually] ');
+
+    // "right" as filler (at end or with comma)
+    marked = marked.replace(/,\s*right\?/gi, ', [right]?');
+    marked = marked.replace(/,\s*right\s*,/gi, ', [right],');
+
+    return marked;
 }
 
 function toggleRecording() {
@@ -267,16 +343,32 @@ function toggleRecording() {
 
 // Analysis functions
 function countWords(text) {
-    return text.trim().split(/\s+/).filter(w => w.length > 0).length;
+    // Remove brackets for counting (they're just markup)
+    const cleanText = text.replace(/[\[\]]/g, '');
+    return cleanText.trim().split(/\s+/).filter(w => w.length > 0).length;
 }
 
 function findFillers(text) {
     const lowerText = text.toLowerCase();
     const found = [];
 
+    // First, find bracketed fillers from our LLM analysis
+    const bracketedMatches = text.match(/\[([^\]]+)\]/g);
+    if (bracketedMatches) {
+        bracketedMatches.forEach(match => {
+            const filler = match.slice(1, -1).toLowerCase(); // Remove brackets
+            found.push(filler);
+        });
+    }
+
+    // Also check for unbracketed filler words (using original detection)
+    // But skip words that are already bracketed
+    const textWithoutBrackets = text.replace(/\[[^\]]+\]/g, '');
+    const lowerTextClean = textWithoutBrackets.toLowerCase();
+
     FILLER_WORDS.forEach(filler => {
         const regex = new RegExp(`\\b${filler}\\b`, 'gi');
-        const matches = lowerText.match(regex);
+        const matches = lowerTextClean.match(regex);
         if (matches) {
             matches.forEach(() => found.push(filler));
         }
@@ -305,13 +397,17 @@ function calculatePace(wordCount, durationSeconds) {
 }
 
 // Results display
-function showResults(text, durationSeconds) {
-    transcriptText.textContent = text;
+function showResults(text, durationSeconds, pauseInfo = []) {
+    // Display transcript with highlighted fillers
+    // Replace [word] with <span class="filler-highlight">word</span>
+    const displayText = text.replace(/\[([^\]]+)\]/g, '<span class="filler-highlight">$1</span>');
+    transcriptText.innerHTML = displayText;
 
     const wordCount = countWords(text);
     const fillers = findFillers(text);
-    const fillerCount = fillers.length;
-    const fillerRate = ((fillerCount / wordCount) * 100).toFixed(1);
+    // Add detected pauses as hesitations
+    const totalHesitations = fillers.length + pauseInfo.length;
+    const fillerRate = ((totalHesitations / wordCount) * 100).toFixed(1);
     const pace = calculatePace(wordCount, durationSeconds);
     const longestSentence = getLongestSentence(text);
     const targetWordCount = currentQuestion ? currentQuestion.targetWords : 120;
@@ -321,9 +417,9 @@ function showResults(text, durationSeconds) {
     wordStatusEl.textContent = wordCount <= targetWordCount ? `Target: ${targetWordCount}` : `${Math.round((wordCount / targetWordCount - 1) * 100)}% over`;
     wordStatusEl.className = `score-status ${wordCount <= targetWordCount * 1.1 ? 'good' : wordCount <= targetWordCount * 1.3 ? 'warning' : 'bad'}`;
 
-    fillerCountEl.textContent = fillerCount;
-    fillerStatusEl.textContent = `${fillerRate}% of words`;
-    fillerStatusEl.className = `score-status ${fillerCount <= 2 ? 'good' : fillerCount <= 5 ? 'warning' : 'bad'}`;
+    fillerCountEl.textContent = `${totalHesitations} (${fillerRate}%)`;
+    fillerStatusEl.textContent = `${fillers.length} verbal + ${pauseInfo.length} pauses`;
+    fillerStatusEl.className = `score-status ${totalHesitations <= 2 ? 'good' : totalHesitations <= 5 ? 'warning' : 'bad'}`;
 
     paceValueEl.textContent = `${pace}`;
     paceStatusEl.textContent = 'wpm';
@@ -334,12 +430,31 @@ function showResults(text, durationSeconds) {
     sentenceStatusEl.className = `score-status ${longestSentence <= 25 ? 'good' : longestSentence <= 35 ? 'warning' : 'bad'}`;
 
     // Show fillers detail if any found
-    if (fillers.length > 0) {
+    if (fillers.length > 0 || pauseInfo.length > 0) {
         fillersDetail.classList.remove('hidden');
-        const uniqueFillers = [...new Set(fillers)];
-        fillersList.innerHTML = uniqueFillers.map(f =>
-            `<span class="filler-word">${f} (${fillers.filter(x => x === f).length})</span>`
-        ).join(' ');
+
+        let fillerHtml = '';
+
+        // Show verbal fillers
+        if (fillers.length > 0) {
+            const uniqueFillers = [...new Set(fillers)];
+            fillerHtml += '<div class="filler-section"><strong>Verbal fillers:</strong> ';
+            fillerHtml += uniqueFillers.map(f =>
+                `<span class="filler-word">${f} (${fillers.filter(x => x === f).length})</span>`
+            ).join(' ');
+            fillerHtml += '</div>';
+        }
+
+        // Show pauses (hesitations)
+        if (pauseInfo.length > 0) {
+            fillerHtml += '<div class="filler-section" style="margin-top: 8px;"><strong>Hesitation pauses:</strong> ';
+            fillerHtml += pauseInfo.map(p =>
+                `<span class="pause-indicator">⏸ ${p.duration.toFixed(1)}s after "...${p.afterText}"</span>`
+            ).join(' ');
+            fillerHtml += '</div>';
+        }
+
+        fillersList.innerHTML = fillerHtml;
     } else {
         fillersDetail.classList.add('hidden');
     }
@@ -354,8 +469,8 @@ function showResults(text, durationSeconds) {
     resultsSection.classList.remove('hidden');
     resetBtn.classList.remove('hidden');
 
-    // Save to history
-    saveToHistory(wordCount, fillerCount, pace, longestSentence);
+    // Save to history (use total hesitations)
+    saveToHistory(wordCount, totalHesitations, pace, longestSentence);
 }
 
 // Groq API for rewrite with coaching feedback
@@ -548,10 +663,29 @@ function updateHistoryDisplay() {
     }).join('');
 }
 
-// Question loading
+// Question loading with tracking to avoid repeats
 function loadNewQuestion() {
-    const randomIndex = Math.floor(Math.random() * QUESTIONS.length);
+    // Get asked questions from localStorage
+    let askedQuestions = JSON.parse(localStorage.getItem('voice_drill_asked_questions') || '[]');
+
+    // If we've asked all questions, reset the list
+    if (askedQuestions.length >= QUESTIONS.length) {
+        console.log('All questions asked! Resetting list.');
+        askedQuestions = [];
+    }
+
+    // Get available questions (not yet asked)
+    const availableIndices = QUESTIONS.map((_, i) => i).filter(i => !askedQuestions.includes(i));
+
+    // Pick a random question from available ones
+    const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
     currentQuestion = QUESTIONS[randomIndex];
+
+    // Track this question as asked
+    askedQuestions.push(randomIndex);
+    localStorage.setItem('voice_drill_asked_questions', JSON.stringify(askedQuestions));
+
+    console.log(`Question ${askedQuestions.length}/${QUESTIONS.length}: "${currentQuestion.question.substring(0, 50)}..."`);
 
     questionCategory.textContent = currentQuestion.category;
     questionText.textContent = currentQuestion.question;
@@ -614,20 +748,39 @@ async function speakCrispVersion() {
 
     // Stop if already speaking
     if (isSpeaking) {
+        // Stop Web Audio API source
+        if (window.currentAudioSource) {
+            try {
+                window.currentAudioSource.stop();
+            } catch (e) { /* ignore */ }
+            window.currentAudioSource = null;
+        }
+        if (window.currentAudioContext) {
+            try {
+                window.currentAudioContext.close();
+            } catch (e) { /* ignore */ }
+            window.currentAudioContext = null;
+        }
+        // Stop HTML5 Audio
         if (audioPlayer) {
             audioPlayer.pause();
             audioPlayer.currentTime = 0;
             audioPlayer = null;
         }
+        // Stop browser TTS
         window.speechSynthesis.cancel();
         isSpeaking = false;
         speakBtn.textContent = '🔊 Listen';
         return;
     }
 
-    // Use browser TTS for reliability on iOS
-    // ElevenLabs has compatibility issues with iOS Safari
-    speakWithBrowser(text);
+    // Try ElevenLabs first for natural voice
+    const elevenLabsKey = localStorage.getItem('elevenlabs_api_key') || DEFAULT_ELEVENLABS_KEY;
+    if (elevenLabsKey) {
+        await speakWithElevenLabs(text, elevenLabsKey);
+    } else {
+        speakWithBrowser(text);
+    }
 }
 
 // ElevenLabs TTS (natural voice)
@@ -639,9 +792,11 @@ async function speakWithElevenLabs(text, apiKey) {
         // Using "Rachel" voice - professional American female
         const voiceId = '21m00Tcm4TlvDq8ikWAM'; // Rachel
 
+        console.log('Calling ElevenLabs API with key:', apiKey.substring(0, 10) + '...');
         const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
             method: 'POST',
             headers: {
+                'Accept': 'audio/mpeg',
                 'Content-Type': 'application/json',
                 'xi-api-key': apiKey
             },
@@ -658,114 +813,155 @@ async function speakWithElevenLabs(text, apiKey) {
         if (!response.ok) {
             const errorText = await response.text().catch(() => 'Unknown error');
             console.error('ElevenLabs error:', response.status, errorText);
-            isSpeaking = false;
-            speakBtn.textContent = '🔊 Listen';
-            // Fallback to browser TTS
-            speakWithBrowser(text);
-            return;
+            throw new Error(`ElevenLabs API error: ${response.status} - ${errorText}`);
         }
 
         const audioBlob = await response.blob();
-        console.log('Audio blob received:', audioBlob.size, 'bytes');
+        console.log('ElevenLabs audio received:', audioBlob.size, 'bytes, type:', audioBlob.type);
 
-        // For iOS compatibility, use a different approach
-        const audioUrl = URL.createObjectURL(audioBlob);
-        audioPlayer = new Audio();
+        if (audioBlob.size < 1000) {
+            console.error('Audio blob too small, likely an error');
+            throw new Error('Invalid audio response');
+        }
 
-        // iOS requires user interaction - set up before playing
-        audioPlayer.preload = 'auto';
-        audioPlayer.src = audioUrl;
+        // Use Web Audio API for better iOS compatibility
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-        audioPlayer.oncanplaythrough = () => {
-            console.log('Audio ready to play');
-            audioPlayer.play().then(() => {
-                speakBtn.textContent = '⏹️ Stop';
-            }).catch(err => {
-                console.error('Play error:', err);
-                isSpeaking = false;
-                speakBtn.textContent = '🔊 Listen';
-                URL.revokeObjectURL(audioUrl);
-                speakWithBrowser(text);
-            });
-        };
+        // iOS Safari requires resuming the audio context after user interaction
+        if (audioContext.state === 'suspended') {
+            await audioContext.resume();
+        }
 
-        audioPlayer.onended = () => {
-            console.log('Audio ended');
+        const arrayBuffer = await audioBlob.arrayBuffer();
+        console.log('ArrayBuffer size:', arrayBuffer.byteLength);
+
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        console.log('Audio decoded, duration:', audioBuffer.duration, 'seconds');
+
+        // Create source and play
+        const source = audioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(audioContext.destination);
+
+        source.onended = () => {
+            console.log('ElevenLabs audio ended');
             isSpeaking = false;
             speakBtn.textContent = '🔊 Listen';
-            URL.revokeObjectURL(audioUrl);
-            audioPlayer = null;
+            audioContext.close();
         };
 
-        audioPlayer.onerror = (e) => {
-            console.error('Audio error:', e);
-            isSpeaking = false;
-            speakBtn.textContent = '🔊 Listen';
-            URL.revokeObjectURL(audioUrl);
-            audioPlayer = null;
-            speakWithBrowser(text);
-        };
+        source.start(0);
+        speakBtn.textContent = '⏹️ Stop';
+        console.log('ElevenLabs audio started playing');
 
-        // Timeout fallback - if nothing happens in 10 seconds, use browser TTS
-        setTimeout(() => {
-            if (speakBtn.textContent === '⏳ Loading...') {
-                console.log('Timeout - falling back to browser TTS');
-                isSpeaking = false;
-                if (audioPlayer) {
-                    audioPlayer.pause();
-                    audioPlayer = null;
-                }
-                URL.revokeObjectURL(audioUrl);
-                speakWithBrowser(text);
-            }
-        }, 10000);
-
-        // Try to load immediately
-        audioPlayer.load();
+        // Store for stopping
+        window.currentAudioSource = source;
+        window.currentAudioContext = audioContext;
 
     } catch (error) {
         console.error('ElevenLabs TTS error:', error);
         isSpeaking = false;
         speakBtn.textContent = '🔊 Listen';
+        // Fallback to browser TTS
+        console.log('Falling back to browser TTS due to:', error.message);
         speakWithBrowser(text);
     }
 }
 
-// Browser TTS fallback
+// Browser TTS fallback - with iOS Safari fix
 function speakWithBrowser(text) {
-    const utterance = new SpeechSynthesisUtterance(text);
+    // iOS Safari requires voices to be loaded first
+    // We need to wait for voices and use a workaround
 
-    // Configure for clear American English
-    utterance.rate = 0.95;
-    utterance.pitch = 1;
-    utterance.volume = 1;
+    speakBtn.textContent = '⏳ Loading...';
+    isSpeaking = true;
 
-    // Try to get an American English voice
-    const voices = window.speechSynthesis.getVoices();
-    const americanVoice = voices.find(v =>
-        v.lang === 'en-US' && (v.name.includes('Samantha') || v.name.includes('Alex') || v.name.includes('Google'))
-    ) || voices.find(v => v.lang === 'en-US') || voices[0];
+    // Cancel any pending speech
+    window.speechSynthesis.cancel();
 
-    if (americanVoice) {
-        utterance.voice = americanVoice;
+    function doSpeak() {
+        const utterance = new SpeechSynthesisUtterance(text);
+
+        // Configure for clear American English
+        utterance.rate = 0.95;
+        utterance.pitch = 1;
+        utterance.volume = 1;
+
+        // Try to get an American English voice
+        const voices = window.speechSynthesis.getVoices();
+        console.log('Available voices:', voices.length);
+
+        const americanVoice = voices.find(v =>
+            v.lang === 'en-US' && (v.name.includes('Samantha') || v.name.includes('Alex') || v.name.includes('Google'))
+        ) || voices.find(v => v.lang.startsWith('en')) || voices[0];
+
+        if (americanVoice) {
+            utterance.voice = americanVoice;
+            console.log('Using voice:', americanVoice.name);
+        }
+
+        utterance.onstart = () => {
+            console.log('Speech started');
+            isSpeaking = true;
+            speakBtn.textContent = '⏹️ Stop';
+        };
+
+        utterance.onend = () => {
+            console.log('Speech ended');
+            isSpeaking = false;
+            speakBtn.textContent = '🔊 Listen';
+        };
+
+        utterance.onerror = (e) => {
+            console.error('Speech error:', e);
+            isSpeaking = false;
+            speakBtn.textContent = '🔊 Listen';
+        };
+
+        // iOS Safari workaround: speech sometimes doesn't start
+        // We need to use a slight delay and check if it started
+        setTimeout(() => {
+            window.speechSynthesis.speak(utterance);
+
+            // iOS Safari bug: speech can get stuck, use resume trick
+            setTimeout(() => {
+                if (window.speechSynthesis.paused) {
+                    window.speechSynthesis.resume();
+                }
+                // If still loading after 2 seconds, something is wrong
+                if (speakBtn.textContent === '⏳ Loading...') {
+                    // Check if speech is actually happening
+                    if (!window.speechSynthesis.speaking) {
+                        console.log('Speech did not start, retrying...');
+                        window.speechSynthesis.cancel();
+                        window.speechSynthesis.speak(utterance);
+                    } else {
+                        speakBtn.textContent = '⏹️ Stop';
+                    }
+                }
+            }, 500);
+        }, 100);
     }
 
-    utterance.onstart = () => {
-        isSpeaking = true;
-        speakBtn.textContent = '⏹️ Stop';
-    };
-
-    utterance.onend = () => {
-        isSpeaking = false;
-        speakBtn.textContent = '🔊 Listen';
-    };
-
-    utterance.onerror = () => {
-        isSpeaking = false;
-        speakBtn.textContent = '🔊 Listen';
-    };
-
-    window.speechSynthesis.speak(utterance);
+    // Check if voices are loaded
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length > 0) {
+        doSpeak();
+    } else {
+        // Wait for voices to load (iOS Safari)
+        console.log('Waiting for voices to load...');
+        window.speechSynthesis.onvoiceschanged = () => {
+            console.log('Voices loaded');
+            doSpeak();
+        };
+        // Fallback: try anyway after 1 second
+        setTimeout(() => {
+            if (speakBtn.textContent === '⏳ Loading...') {
+                console.log('Timeout waiting for voices, trying anyway');
+                doSpeak();
+            }
+        }, 1000);
+    }
 }
 
 // Event listeners
@@ -1060,11 +1256,252 @@ if (reminderTime) {
     reminderTime.addEventListener('change', saveReminderSettings);
 }
 
+// ========================
+// Weekly Debrief System
+// ========================
+
+function getWeekNumber(date) {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+    const yearStart = new Date(d.getFullYear(), 0, 1);
+    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+function getWeeklyStats() {
+    const history = JSON.parse(localStorage.getItem('voice_drill_history') || '[]');
+
+    // Get sessions from the past 7 days
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const thisWeekSessions = history.filter(h => new Date(h.date) >= weekAgo);
+
+    if (thisWeekSessions.length === 0) {
+        return null;
+    }
+
+    // Calculate averages
+    const avgFillers = thisWeekSessions.reduce((sum, h) => sum + h.fillerCount, 0) / thisWeekSessions.length;
+    const avgPace = thisWeekSessions.reduce((sum, h) => sum + h.pace, 0) / thisWeekSessions.length;
+    const avgWords = thisWeekSessions.reduce((sum, h) => sum + h.wordCount, 0) / thisWeekSessions.length;
+    const avgLongest = thisWeekSessions.reduce((sum, h) => sum + h.longestSentence, 0) / thisWeekSessions.length;
+
+    // Find best and worst sessions
+    const bestFillers = Math.min(...thisWeekSessions.map(h => h.fillerCount));
+    const worstFillers = Math.max(...thisWeekSessions.map(h => h.fillerCount));
+
+    // Get previous week for comparison
+    const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+    const lastWeekSessions = history.filter(h => {
+        const date = new Date(h.date);
+        return date >= twoWeeksAgo && date < weekAgo;
+    });
+
+    let comparison = null;
+    if (lastWeekSessions.length > 0) {
+        const lastWeekAvgFillers = lastWeekSessions.reduce((sum, h) => sum + h.fillerCount, 0) / lastWeekSessions.length;
+        comparison = {
+            fillerChange: avgFillers - lastWeekAvgFillers,
+            sessionChange: thisWeekSessions.length - lastWeekSessions.length
+        };
+    }
+
+    return {
+        sessionCount: thisWeekSessions.length,
+        avgFillers: avgFillers.toFixed(1),
+        avgPace: Math.round(avgPace),
+        avgWords: Math.round(avgWords),
+        avgLongest: Math.round(avgLongest),
+        bestFillers,
+        worstFillers,
+        comparison,
+        sessions: thisWeekSessions
+    };
+}
+
+function generateWeeklyDebrief() {
+    const stats = getWeeklyStats();
+
+    if (!stats) {
+        return {
+            summary: "No practice sessions this week. Time to get started!",
+            strengths: [],
+            improvements: [],
+            focus: "Complete at least 3 practice sessions this week."
+        };
+    }
+
+    const strengths = [];
+    const improvements = [];
+
+    // Analyze filler performance
+    if (parseFloat(stats.avgFillers) <= 2) {
+        strengths.push("Excellent filler control - averaging only " + stats.avgFillers + " per session");
+    } else if (parseFloat(stats.avgFillers) <= 5) {
+        improvements.push("Work on reducing fillers - averaging " + stats.avgFillers + " per session (target: under 3)");
+    } else {
+        improvements.push("Focus on filler reduction - " + stats.avgFillers + " per session is too high. Try pausing silently instead of 'um'");
+    }
+
+    // Analyze pace
+    if (stats.avgPace >= 140 && stats.avgPace <= 170) {
+        strengths.push("Great speaking pace at " + stats.avgPace + " wpm - clear and professional");
+    } else if (stats.avgPace < 140) {
+        improvements.push("Speed up slightly - " + stats.avgPace + " wpm is a bit slow. Aim for 140-170 wpm");
+    } else {
+        improvements.push("Slow down a bit - " + stats.avgPace + " wpm is too fast. Take breaths between sentences");
+    }
+
+    // Analyze sentence length
+    if (stats.avgLongest <= 25) {
+        strengths.push("Concise sentences - averaging " + stats.avgLongest + " words (perfect for clarity)");
+    } else if (stats.avgLongest <= 35) {
+        improvements.push("Watch run-on sentences - averaging " + stats.avgLongest + " words. Try breaking at 'and' or 'but'");
+    } else {
+        improvements.push("Sentences too long at " + stats.avgLongest + " words - break them up for impact");
+    }
+
+    // Session consistency
+    if (stats.sessionCount >= 5) {
+        strengths.push("Excellent consistency with " + stats.sessionCount + " sessions this week!");
+    } else if (stats.sessionCount >= 3) {
+        strengths.push("Good practice habit - " + stats.sessionCount + " sessions this week");
+    } else {
+        improvements.push("Aim for more consistency - try to practice 3-5 times per week");
+    }
+
+    // Week-over-week comparison
+    let trendNote = "";
+    if (stats.comparison) {
+        if (stats.comparison.fillerChange < -1) {
+            trendNote = "📈 You reduced fillers by " + Math.abs(stats.comparison.fillerChange).toFixed(1) + " compared to last week!";
+        } else if (stats.comparison.fillerChange > 1) {
+            trendNote = "📉 Fillers increased by " + stats.comparison.fillerChange.toFixed(1) + " from last week - refocus on pausing";
+        }
+    }
+
+    // Generate focus for next week
+    let focus = "";
+    if (improvements.length > 0) {
+        // Pick the most important improvement
+        if (parseFloat(stats.avgFillers) > 5) {
+            focus = "This week's focus: Replace 'um' and 'like' with silent pauses. Record yourself and count fillers.";
+        } else if (stats.avgLongest > 30) {
+            focus = "This week's focus: Shorter sentences. When you use 'and', stop and start a new sentence instead.";
+        } else if (stats.avgPace < 130 || stats.avgPace > 180) {
+            focus = "This week's focus: Pace control. Practice speaking at a steady 150 wpm rhythm.";
+        } else {
+            focus = "This week's focus: Polish your delivery. Practice the AI crisp versions out loud.";
+        }
+    } else {
+        focus = "Keep up the great work! Challenge yourself with the harder question categories.";
+    }
+
+    return {
+        summary: `${stats.sessionCount} sessions this week. Avg ${stats.avgFillers} fillers, ${stats.avgPace} wpm pace.`,
+        strengths,
+        improvements,
+        focus,
+        trendNote,
+        stats
+    };
+}
+
+function showWeeklyDebrief() {
+    const debriefModal = document.getElementById('weekly-debrief-modal');
+    if (!debriefModal) return;
+
+    const debrief = generateWeeklyDebrief();
+
+    // Populate the modal
+    document.getElementById('debrief-summary').textContent = debrief.summary;
+
+    const strengthsList = document.getElementById('debrief-strengths');
+    const improvementsList = document.getElementById('debrief-improvements');
+
+    if (debrief.strengths.length > 0) {
+        strengthsList.innerHTML = debrief.strengths.map(s => `<li>✅ ${s}</li>`).join('');
+        strengthsList.parentElement.classList.remove('hidden');
+    } else {
+        strengthsList.parentElement.classList.add('hidden');
+    }
+
+    if (debrief.improvements.length > 0) {
+        improvementsList.innerHTML = debrief.improvements.map(i => `<li>🎯 ${i}</li>`).join('');
+        improvementsList.parentElement.classList.remove('hidden');
+    } else {
+        improvementsList.parentElement.classList.add('hidden');
+    }
+
+    document.getElementById('debrief-focus').textContent = debrief.focus;
+
+    const trendEl = document.getElementById('debrief-trend');
+    if (debrief.trendNote) {
+        trendEl.textContent = debrief.trendNote;
+        trendEl.classList.remove('hidden');
+    } else {
+        trendEl.classList.add('hidden');
+    }
+
+    debriefModal.classList.remove('hidden');
+
+    // Mark as shown for this week
+    const now = new Date();
+    const weekKey = `${now.getFullYear()}-W${getWeekNumber(now)}`;
+    localStorage.setItem('voice_drill_last_debrief', weekKey);
+}
+
+function closeWeeklyDebrief() {
+    const debriefModal = document.getElementById('weekly-debrief-modal');
+    if (debriefModal) {
+        debriefModal.classList.add('hidden');
+    }
+}
+
+function checkShowWeeklyDebrief() {
+    const history = JSON.parse(localStorage.getItem('voice_drill_history') || '[]');
+
+    // Need at least 1 session to show debrief
+    if (history.length === 0) return;
+
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0 = Sunday
+    const hour = now.getHours();
+
+    // Show on Sunday morning (before noon) or if user manually requested
+    const isSundayMorning = dayOfWeek === 0 && hour < 12;
+
+    // Check if already shown this week
+    const weekKey = `${now.getFullYear()}-W${getWeekNumber(now)}`;
+    const lastShown = localStorage.getItem('voice_drill_last_debrief');
+
+    if (isSundayMorning && lastShown !== weekKey) {
+        // Small delay to let the page load
+        setTimeout(() => {
+            showWeeklyDebrief();
+        }, 500);
+    }
+}
+
+// Event listener for debrief button
+document.addEventListener('click', (e) => {
+    if (e.target.id === 'close-debrief') {
+        closeWeeklyDebrief();
+    }
+    if (e.target.id === 'show-debrief-btn') {
+        showWeeklyDebrief();
+    }
+});
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     updateHistoryDisplay();
     updateProgressChart();
     loadReminderSettings();
+
+    // Check if we should show weekly debrief
+    checkShowWeeklyDebrief();
 
     // Start reminder scheduler if enabled
     const settings = JSON.parse(localStorage.getItem('voice_drill_reminder') || '{}');
