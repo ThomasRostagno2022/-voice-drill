@@ -792,7 +792,7 @@ async function speakWithElevenLabs(text, apiKey) {
         // Using "Rachel" voice - professional American female
         const voiceId = '21m00Tcm4TlvDq8ikWAM'; // Rachel
 
-        console.log('Calling ElevenLabs API with key:', apiKey.substring(0, 10) + '...');
+        console.log('Calling ElevenLabs API...');
         const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
             method: 'POST',
             headers: {
@@ -813,58 +813,97 @@ async function speakWithElevenLabs(text, apiKey) {
         if (!response.ok) {
             const errorText = await response.text().catch(() => 'Unknown error');
             console.error('ElevenLabs error:', response.status, errorText);
-            throw new Error(`ElevenLabs API error: ${response.status} - ${errorText}`);
+            // Show user-friendly error
+            if (response.status === 401) {
+                throw new Error('ElevenLabs API key invalid or expired');
+            } else if (response.status === 429) {
+                throw new Error('ElevenLabs quota exceeded - try again later');
+            } else {
+                throw new Error(`ElevenLabs error: ${response.status}`);
+            }
         }
 
         const audioBlob = await response.blob();
-        console.log('ElevenLabs audio received:', audioBlob.size, 'bytes, type:', audioBlob.type);
+        console.log('ElevenLabs audio received:', audioBlob.size, 'bytes');
 
         if (audioBlob.size < 1000) {
-            console.error('Audio blob too small, likely an error');
-            throw new Error('Invalid audio response');
+            throw new Error('Invalid audio response from ElevenLabs');
         }
 
-        // Use Web Audio API for better iOS compatibility
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        // Try HTML5 Audio first (works better on some devices)
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
 
-        // iOS Safari requires resuming the audio context after user interaction
-        if (audioContext.state === 'suspended') {
-            await audioContext.resume();
-        }
+        // Set up for iOS
+        audio.playsInline = true;
+        audio.preload = 'auto';
 
-        const arrayBuffer = await audioBlob.arrayBuffer();
-        console.log('ArrayBuffer size:', arrayBuffer.byteLength);
-
-        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-        console.log('Audio decoded, duration:', audioBuffer.duration, 'seconds');
-
-        // Create source and play
-        const source = audioContext.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(audioContext.destination);
-
-        source.onended = () => {
+        audio.onended = () => {
             console.log('ElevenLabs audio ended');
             isSpeaking = false;
             speakBtn.textContent = '🔊 Listen';
-            audioContext.close();
+            URL.revokeObjectURL(audioUrl);
         };
 
-        source.start(0);
-        speakBtn.textContent = '⏹️ Stop';
-        console.log('ElevenLabs audio started playing');
+        audio.onerror = async (e) => {
+            console.error('HTML5 Audio failed, trying Web Audio API:', e);
+            URL.revokeObjectURL(audioUrl);
+
+            // Fallback to Web Audio API
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioContext.state === 'suspended') {
+                    await audioContext.resume();
+                }
+                const arrayBuffer = await audioBlob.arrayBuffer();
+                const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                const source = audioContext.createBufferSource();
+                source.buffer = audioBuffer;
+                source.connect(audioContext.destination);
+                source.onended = () => {
+                    isSpeaking = false;
+                    speakBtn.textContent = '🔊 Listen';
+                    audioContext.close();
+                };
+                source.start(0);
+                window.currentAudioSource = source;
+                window.currentAudioContext = audioContext;
+            } catch (webAudioError) {
+                console.error('Web Audio API also failed:', webAudioError);
+                throw webAudioError;
+            }
+        };
 
         // Store for stopping
-        window.currentAudioSource = source;
-        window.currentAudioContext = audioContext;
+        audioPlayer = audio;
+
+        // Play
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                console.log('ElevenLabs audio playing via HTML5 Audio');
+                speakBtn.textContent = '⏹️ Stop';
+            }).catch(async (playError) => {
+                console.error('Play failed:', playError);
+                // Try Web Audio API as fallback
+                audio.onerror(playError);
+            });
+        }
 
     } catch (error) {
         console.error('ElevenLabs TTS error:', error);
         isSpeaking = false;
         speakBtn.textContent = '🔊 Listen';
-        // Fallback to browser TTS
-        console.log('Falling back to browser TTS due to:', error.message);
-        speakWithBrowser(text);
+
+        // Show what went wrong, then fall back
+        const errorMsg = error.message || 'Unknown error';
+        console.log('ElevenLabs failed:', errorMsg, '- using browser voice');
+
+        // Visual indicator that we're using fallback
+        speakBtn.textContent = '🔊 Listen (basic)';
+        setTimeout(() => {
+            speakWithBrowser(text);
+        }, 100);
     }
 }
 
