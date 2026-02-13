@@ -878,13 +878,21 @@ async function speakCrispVersion() {
     // Try ElevenLabs first for natural voice
     const elevenLabsKey = localStorage.getItem('elevenlabs_api_key') || DEFAULT_ELEVENLABS_KEY;
     if (elevenLabsKey) {
-        await speakWithElevenLabs(text, elevenLabsKey);
+        const success = await speakWithElevenLabs(text, elevenLabsKey);
+        if (!success) {
+            // Show alert on first failure so user knows
+            if (!localStorage.getItem('elevenlabs_warned')) {
+                localStorage.setItem('elevenlabs_warned', 'true');
+                alert('⚠️ ElevenLabs voice unavailable (API key expired). Using basic voice. Go to Settings to add a new ElevenLabs key for natural voice.');
+            }
+        }
     } else {
         speakWithBrowser(text);
     }
 }
 
 // ElevenLabs TTS (natural voice)
+// Returns true if successful, false if failed (so caller can show warning)
 async function speakWithElevenLabs(text, apiKey) {
     speakBtn.textContent = '⏳ Loading...';
     isSpeaking = true;
@@ -893,7 +901,7 @@ async function speakWithElevenLabs(text, apiKey) {
         // Using "Rachel" voice - professional American female
         const voiceId = '21m00Tcm4TlvDq8ikWAM'; // Rachel
 
-        console.log('Calling ElevenLabs API...');
+        console.log('Calling ElevenLabs API with key:', apiKey.substring(0, 10) + '...');
         const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
             method: 'POST',
             headers: {
@@ -991,6 +999,8 @@ async function speakWithElevenLabs(text, apiKey) {
             });
         }
 
+        return true; // Success
+
     } catch (error) {
         console.error('ElevenLabs TTS error:', error);
         isSpeaking = false;
@@ -1005,6 +1015,8 @@ async function speakWithElevenLabs(text, apiKey) {
         setTimeout(() => {
             speakWithBrowser(text);
         }, 100);
+
+        return false; // Failed
     }
 }
 
