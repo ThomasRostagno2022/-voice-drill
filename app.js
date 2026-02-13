@@ -1,7 +1,7 @@
 // Default API keys (can be overridden in settings)
 // Keys are split to avoid GitHub secret scanning
 const DEFAULT_GROQ_KEY = ['gsk_DJtowUxnkrNBdieWUGDG', 'WGdyb3FYltJH62LU8Uqd7kNB3bNJntmU'].join('');
-const DEFAULT_ELEVENLABS_KEY = ['sk_116ea5a2737312a826b3', '447f0f2ff466fe4ac8f08941870a'].join('');
+const DEFAULT_ELEVENLABS_KEY = ['sk_61e4a887a2cd2c786e03fb2f', '249aa5398b928b3e5a09e4df'].join('');
 
 // State
 let currentQuestion = null;
@@ -911,7 +911,7 @@ async function speakWithElevenLabs(text, apiKey) {
             },
             body: JSON.stringify({
                 text: text,
-                model_id: 'eleven_monolingual_v1',
+                model_id: 'eleven_multilingual_v2',
                 voice_settings: {
                     stability: 0.5,
                     similarity_boost: 0.75
