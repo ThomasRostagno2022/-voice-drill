@@ -859,6 +859,161 @@ const QUESTIONS = [
         question: "'We don't have budget for that.' Find another path forward.",
         targetWords: 60,
         targetTime: 45
+    },
+
+    // ========================================
+    // APPLIED AI / TECHNICAL LEADERSHIP (25 questions)
+    // Persona: Alena Fedorenko, Head of Applied AI at Anthropic
+    // ========================================
+    {
+        category: "Applied AI",
+        question: "Tell me about a technically complex project you led. How did you navigate the ambiguity?",
+        targetWords: 150,
+        targetTime: 90
+    },
+    {
+        category: "Applied AI",
+        question: "How do you evaluate whether an AI/ML solution is the right approach vs. a simpler heuristic?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Applied AI",
+        question: "Describe a time you had to make a product decision with significant technical uncertainty.",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Applied AI",
+        question: "How do you think about the tradeoffs between model capability and safety?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Applied AI",
+        question: "Tell me about a time you had to push back on a technical approach that wasn't right.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Applied AI",
+        question: "How do you stay current with the rapidly evolving AI landscape?",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Applied AI",
+        question: "Describe how you've built trust with engineering teams as a non-engineer or cross-functional leader.",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Applied AI",
+        question: "What's your framework for prioritizing features when everything seems urgent?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Technical Leadership",
+        question: "How do you lead engineers through ambiguity when requirements are unclear?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Technical Leadership",
+        question: "Tell me about a time you had to deliver a project with a team that was skeptical of the direction.",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Technical Leadership",
+        question: "How do you balance technical debt with shipping new features?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Technical Leadership",
+        question: "Describe a time you had to make a difficult resource allocation decision.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Technical Leadership",
+        question: "How do you give feedback to engineers who are more technically deep than you?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Technical Leadership",
+        question: "Tell me about a project that failed. What did you learn about your leadership?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Technical Leadership",
+        question: "How do you create psychological safety in a high-pressure technical environment?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Engineering Management",
+        question: "How do you evaluate and develop talent on your engineering teams?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Engineering Management",
+        question: "Describe your approach to running effective technical reviews.",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Engineering Management",
+        question: "How do you handle conflict between engineers with different technical opinions?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Engineering Management",
+        question: "What's your approach to setting technical direction without micromanaging?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Engineering Management",
+        question: "How do you know when to be hands-on vs. delegate technical decisions?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Technical Strategy",
+        question: "How do you think about build vs. buy decisions for AI capabilities?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Technical Strategy",
+        question: "Describe how you've influenced technical roadmap decisions at the executive level.",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Technical Strategy",
+        question: "How do you communicate complex technical tradeoffs to non-technical stakeholders?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Technical Strategy",
+        question: "What's your framework for evaluating emerging technologies vs. proven solutions?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Technical Strategy",
+        question: "How do you think about platform investments that have long-term payoffs?",
+        targetWords: 100,
+        targetTime: 75
     }
 ];
 

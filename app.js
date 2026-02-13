@@ -497,11 +497,22 @@ async function getRewrite() {
     const wordCount = countWords(transcript);
     const targetWordCount = currentQuestion ? currentQuestion.targetWords : 120;
 
-    const prompt = `You are an executive communication coach and interview expert helping a French professional sound like a polished American business leader.
+    const questionCategory = currentQuestion ? currentQuestion.category : 'General';
+
+    // Determine which hiring manager persona to use based on question category
+    const isAppliedAI = ['Technical Leadership', 'Applied AI', 'Engineering Management', 'Technical Strategy'].includes(questionCategory);
+    const hiringManagerPersona = isAppliedAI
+        ? 'Alena Fedorenko, Head of Applied AI at Anthropic - she values technical depth, clear thinking under ambiguity, ability to ship products with cross-functional teams, and strong judgment on AI safety and capabilities'
+        : 'Mike Leeds, GTM leader at Databricks - he values crisp executive communication, data-driven insights, strategic thinking, and the ability to influence senior stakeholders';
+
+    const prompt = `You are an executive communication coach helping a French professional prepare for interviews at top tech companies.
+
+HIRING MANAGER PERSONA:
+Evaluate this answer as if you were ${hiringManagerPersona}.
 
 CONTEXT:
 - Question: "${currentQuestion ? currentQuestion.question : 'Interview question'}"
-- Question Category: "${currentQuestion ? currentQuestion.category : 'General'}"
+- Question Category: "${questionCategory}"
 - Target word count: ${targetWordCount} words
 - Their answer: ${wordCount} words
 - Fillers detected: ${fillers.length > 0 ? fillers.join(', ') : 'none'}
@@ -514,31 +525,34 @@ YOUR TASK:
 Provide THREE things in your response, clearly separated:
 
 PART 1 - RELEVANCE ASSESSMENT:
-Rate the answer's interview-readiness from a hiring manager's perspective:
-- SCORE: Give a score from 1-10 (10 = perfect answer, ready for real interview)
+Rate the answer's interview-readiness from ${isAppliedAI ? "Alena's" : "Mike's"} perspective:
+- SCORE: Give a score from 1-10 (10 = would immediately advance to next round)
 - VERDICT: One of: "Interview Ready ✅", "Almost There 🔶", or "Needs Work 🔴"
-- WHY: 1-2 sentences explaining the score. Consider:
-  * Does it directly answer the question asked?
-  * Does it include specific examples, numbers, or results?
-  * Does it demonstrate relevant skills/experience?
-  * Would a hiring manager be impressed or left wanting more?
-  * Is there a clear structure (situation, action, result)?
+- WHY: 1-2 sentences explaining the score. ${isAppliedAI
+    ? "Consider: Does it show technical depth? Clear thinking? Ability to navigate ambiguity? Leadership of engineers? Product judgment?"
+    : "Consider: Is it crisp and executive-ready? Data-driven? Strategic? Would it impress a CRO or VP Sales?"}
+
+A 10/10 answer:
+${isAppliedAI
+    ? "- Shows deep technical understanding without getting lost in details\n- Demonstrates clear decision-making framework\n- Shows how they led engineers through ambiguity\n- Includes specific outcomes and learnings\n- Shows product sense and user empathy"
+    : "- Leads with the headline/impact\n- Includes specific metrics ($X revenue, Y% improvement)\n- Shows strategic thinking and business acumen\n- Demonstrates influence and stakeholder management\n- Is concise yet substantive"}
 
 PART 2 - CRISP VERSION:
-Rewrite their answer following these principles:
+Rewrite their answer to be interview-grade for ${isAppliedAI ? "Anthropic Applied AI" : "Databricks GTM"}:
 - Lead with the headline (main point first, then support)
+- ${isAppliedAI ? "Show technical depth with clear explanations" : "Include specific metrics and business impact"}
 - Keep ALL important context, examples, and specifics - don't oversimplify
 - Remove filler words and verbal padding
 - Break run-on sentences (max 20 words each)
 - Use active voice and strong verbs
-- Maintain their authentic voice and personality
-- Target ${Math.round(targetWordCount * 0.9)}-${targetWordCount} words (preserve substance!)
+- ${isAppliedAI ? "Demonstrate clear thinking and judgment" : "Sound executive-ready and confident"}
+- Target ${Math.round(targetWordCount * 0.9)}-${targetWordCount} words
 
 PART 3 - COACHING TIPS:
-Give 2-3 specific, actionable tips based on THEIR answer. Be specific about what they said vs what to say. Examples:
-- "You started with context. Try: '[Main point]. Here's why...' instead of 'So basically what happened was...'"
-- "Your 35-word sentence about X could be two punchy ones"
-- "Add a specific metric or outcome to make it more impactful"
+Give 2-3 specific, actionable tips based on THEIR answer. Be specific about what they said vs what to say. Include:
+- What ${isAppliedAI ? "Alena" : "Mike"} would want to hear more of
+- Specific phrases to use or avoid
+- How to strengthen the impact
 
 FORMAT YOUR RESPONSE EXACTLY LIKE THIS:
 ---RELEVANCE---
@@ -636,6 +650,9 @@ WHY: [1-2 sentence explanation]
                 }
 
                 relevanceSection.classList.remove('hidden');
+
+                // Save AI feedback to history
+                saveAIFeedbackToHistory(score, verdict, why, tips, crispVersion);
             }
         }
 
@@ -677,27 +694,46 @@ WHY: [1-2 sentence explanation]
     }
 }
 
-// History management
+// History management with full tracking
 function saveToHistory(wordCount, fillerCount, pace, longestSentence) {
     const history = JSON.parse(localStorage.getItem('voice_drill_history') || '[]');
 
     history.unshift({
         date: new Date().toISOString(),
-        question: currentQuestion ? currentQuestion.question.substring(0, 50) + '...' : 'Unknown',
+        question: currentQuestion ? currentQuestion.question : 'Unknown',
+        questionShort: currentQuestion ? currentQuestion.question.substring(0, 50) + '...' : 'Unknown',
+        category: currentQuestion ? currentQuestion.category : 'Unknown',
         wordCount,
         fillerCount,
         pace,
-        longestSentence
+        longestSentence,
+        transcript: transcript || ''
     });
 
-    // Keep only last 20 sessions
-    if (history.length > 20) {
+    // Keep only last 50 sessions for better tracking
+    if (history.length > 50) {
         history.pop();
     }
 
     localStorage.setItem('voice_drill_history', JSON.stringify(history));
     updateHistoryDisplay();
     updateProgressChart();
+}
+
+// Save AI feedback to history (called after getRewrite)
+function saveAIFeedbackToHistory(score, verdict, why, tips, crispVersion) {
+    const history = JSON.parse(localStorage.getItem('voice_drill_history') || '[]');
+
+    if (history.length > 0) {
+        // Update the most recent entry with AI feedback
+        history[0].aiScore = score;
+        history[0].aiVerdict = verdict;
+        history[0].aiWhy = why;
+        history[0].aiTips = tips;
+        history[0].crispVersion = crispVersion;
+
+        localStorage.setItem('voice_drill_history', JSON.stringify(history));
+    }
 }
 
 function updateHistoryDisplay() {
