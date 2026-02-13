@@ -728,6 +728,66 @@ header h1 {
     margin-top: 12px;
 }
 
+/* Interview Readiness Assessment */
+.relevance-assessment {
+    margin-bottom: 16px;
+    padding: 16px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-radius: 12px;
+    border-left: 4px solid #0ea5e9;
+}
+
+.relevance-assessment h3 {
+    color: #0369a1;
+    margin-bottom: 12px;
+    font-size: 16px;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.relevance-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.relevance-score-value {
+    font-size: 28px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 8px;
+    background: white;
+}
+
+.relevance-score-value.score-good {
+    color: var(--success);
+    background: var(--success-light);
+}
+
+.relevance-score-value.score-warning {
+    color: var(--warning);
+    background: var(--warning-light);
+}
+
+.relevance-score-value.score-bad {
+    color: var(--danger);
+    background: var(--danger-light);
+}
+
+.relevance-verdict {
+    font-size: 16px;
+    font-weight: 600;
+    color: #0c4a6e;
+}
+
+.relevance-explanation {
+    font-size: 14px;
+    color: #075985;
+    line-height: 1.5;
+    margin: 0;
+}
+
 /* Coaching Feedback */
 .coaching-feedback {
     margin-top: 16px;
@@ -1047,6 +1107,27 @@ header h1 {
 
     #history-section {
         background: rgba(31, 41, 55, 0.7);
+    }
+
+    .relevance-assessment {
+        background: linear-gradient(135deg, #0c4a6e 0%, #075985 100%);
+        border-left-color: #38bdf8;
+    }
+
+    .relevance-assessment h3 {
+        color: #bae6fd;
+    }
+
+    .relevance-verdict {
+        color: #e0f2fe;
+    }
+
+    .relevance-explanation {
+        color: #bae6fd;
+    }
+
+    .relevance-score-value {
+        background: var(--gray-700);
     }
 
     .coaching-feedback {

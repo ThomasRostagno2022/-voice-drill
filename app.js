@@ -486,19 +486,22 @@ async function getRewrite() {
     rewriteLoading.classList.remove('hidden');
     rewriteError.classList.add('hidden');
 
-    // Hide previous feedback
+    // Hide previous feedback and relevance
     const feedbackSection = document.getElementById('coaching-feedback');
     if (feedbackSection) feedbackSection.classList.add('hidden');
+    const relevanceSection = document.getElementById('relevance-assessment');
+    if (relevanceSection) relevanceSection.classList.add('hidden');
 
     const fillers = findFillers(transcript);
     const longestSentence = getLongestSentence(transcript);
     const wordCount = countWords(transcript);
     const targetWordCount = currentQuestion ? currentQuestion.targetWords : 120;
 
-    const prompt = `You are an executive communication coach helping a French professional sound like a polished American business leader.
+    const prompt = `You are an executive communication coach and interview expert helping a French professional sound like a polished American business leader.
 
 CONTEXT:
 - Question: "${currentQuestion ? currentQuestion.question : 'Interview question'}"
+- Question Category: "${currentQuestion ? currentQuestion.category : 'General'}"
 - Target word count: ${targetWordCount} words
 - Their answer: ${wordCount} words
 - Fillers detected: ${fillers.length > 0 ? fillers.join(', ') : 'none'}
@@ -508,9 +511,20 @@ THEIR ORIGINAL ANSWER:
 "${transcript}"
 
 YOUR TASK:
-Provide TWO things in your response, clearly separated:
+Provide THREE things in your response, clearly separated:
 
-PART 1 - CRISP VERSION:
+PART 1 - RELEVANCE ASSESSMENT:
+Rate the answer's interview-readiness from a hiring manager's perspective:
+- SCORE: Give a score from 1-10 (10 = perfect answer, ready for real interview)
+- VERDICT: One of: "Interview Ready ✅", "Almost There 🔶", or "Needs Work 🔴"
+- WHY: 1-2 sentences explaining the score. Consider:
+  * Does it directly answer the question asked?
+  * Does it include specific examples, numbers, or results?
+  * Does it demonstrate relevant skills/experience?
+  * Would a hiring manager be impressed or left wanting more?
+  * Is there a clear structure (situation, action, result)?
+
+PART 2 - CRISP VERSION:
 Rewrite their answer following these principles:
 - Lead with the headline (main point first, then support)
 - Keep ALL important context, examples, and specifics - don't oversimplify
@@ -520,13 +534,17 @@ Rewrite their answer following these principles:
 - Maintain their authentic voice and personality
 - Target ${Math.round(targetWordCount * 0.9)}-${targetWordCount} words (preserve substance!)
 
-PART 2 - COACHING TIPS:
+PART 3 - COACHING TIPS:
 Give 2-3 specific, actionable tips based on THEIR answer. Be specific about what they said vs what to say. Examples:
 - "You started with context. Try: '[Main point]. Here's why...' instead of 'So basically what happened was...'"
 - "Your 35-word sentence about X could be two punchy ones"
-- "Replace 'kind of' and 'sort of' with confident statements"
+- "Add a specific metric or outcome to make it more impactful"
 
 FORMAT YOUR RESPONSE EXACTLY LIKE THIS:
+---RELEVANCE---
+SCORE: [1-10]
+VERDICT: [Interview Ready ✅ / Almost There 🔶 / Needs Work 🔴]
+WHY: [1-2 sentence explanation]
 ---CRISP---
 [The rewritten answer here]
 ---TIPS---
@@ -563,15 +581,62 @@ FORMAT YOUR RESPONSE EXACTLY LIKE THIS:
         const fullResponse = data.choices[0].message.content.trim();
 
         // Parse the response
+        let relevance = '';
         let crispVersion = fullResponse;
         let tips = '';
 
-        if (fullResponse.includes('---CRISP---') && fullResponse.includes('---TIPS---')) {
+        if (fullResponse.includes('---RELEVANCE---') && fullResponse.includes('---CRISP---') && fullResponse.includes('---TIPS---')) {
+            const relevanceMatch = fullResponse.match(/---RELEVANCE---\s*([\s\S]*?)\s*---CRISP---/);
+            const crispMatch = fullResponse.match(/---CRISP---\s*([\s\S]*?)\s*---TIPS---/);
+            const tipsMatch = fullResponse.match(/---TIPS---\s*([\s\S]*?)$/);
+
+            if (relevanceMatch) relevance = relevanceMatch[1].trim();
+            if (crispMatch) crispVersion = crispMatch[1].trim();
+            if (tipsMatch) tips = tipsMatch[1].trim();
+        } else if (fullResponse.includes('---CRISP---') && fullResponse.includes('---TIPS---')) {
+            // Fallback for older format
             const crispMatch = fullResponse.match(/---CRISP---\s*([\s\S]*?)\s*---TIPS---/);
             const tipsMatch = fullResponse.match(/---TIPS---\s*([\s\S]*?)$/);
 
             if (crispMatch) crispVersion = crispMatch[1].trim();
             if (tipsMatch) tips = tipsMatch[1].trim();
+        }
+
+        // Show relevance assessment
+        const relevanceSection = document.getElementById('relevance-assessment');
+        if (relevance && relevanceSection) {
+            // Parse relevance details
+            const scoreMatch = relevance.match(/SCORE:\s*(\d+)/i);
+            const verdictMatch = relevance.match(/VERDICT:\s*(.+?)(?:\n|$)/i);
+            const whyMatch = relevance.match(/WHY:\s*(.+?)$/is);
+
+            const score = scoreMatch ? parseInt(scoreMatch[1]) : null;
+            const verdict = verdictMatch ? verdictMatch[1].trim() : '';
+            const why = whyMatch ? whyMatch[1].trim() : '';
+
+            if (score !== null) {
+                const scoreEl = document.getElementById('relevance-score');
+                const verdictEl = document.getElementById('relevance-verdict');
+                const whyEl = document.getElementById('relevance-why');
+
+                if (scoreEl) scoreEl.textContent = score + '/10';
+                if (verdictEl) verdictEl.textContent = verdict;
+                if (whyEl) whyEl.textContent = why;
+
+                // Color code based on score
+                if (scoreEl) {
+                    scoreEl.className = 'relevance-score-value';
+                    if (score >= 8) {
+                        scoreEl.classList.add('score-good');
+                    } else if (score >= 5) {
+                        scoreEl.classList.add('score-warning');
+                    } else {
+                        scoreEl.classList.add('score-bad');
+                    }
+                }
+
+                relevanceSection.classList.remove('hidden');
+            }
         }
 
         // Show crisp version
