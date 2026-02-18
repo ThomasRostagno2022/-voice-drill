@@ -1014,6 +1014,401 @@ const QUESTIONS = [
         question: "How do you think about platform investments that have long-term payoffs?",
         targetWords: 100,
         targetTime: 75
+    },
+
+    // ========================================
+    // ANTHROPIC - BACKGROUND & MOTIVATION (8 questions)
+    // Persona: Alena Fedorenko, Head of Applied AI at Anthropic
+    // ========================================
+    {
+        category: "Anthropic - Background",
+        question: "Walk me through your background.",
+        targetWords: 150,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Background",
+        question: "Why are you leaving McKinsey?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Background",
+        question: "Why Anthropic?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Background",
+        question: "Why this role specifically?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Anthropic - Background",
+        question: "What do you know about how we work with enterprise clients?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Background",
+        question: "I see you're at McKinsey — I was at QuantumBlack. What's driving you to go in-house vs. staying in consulting?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Background",
+        question: "What kind of environment do you do your best work in?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Anthropic - Background",
+        question: "What motivates you?",
+        targetWords: 100,
+        targetTime: 75
+    },
+
+    // ========================================
+    // ANTHROPIC - AMBIGUITY & DECISION MAKING (5 questions)
+    // ========================================
+    {
+        category: "Anthropic - Ambiguity",
+        question: "Tell me about a time you had to make a decision with incomplete information.",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Ambiguity",
+        question: "How do you prioritize when everything feels urgent and the scope keeps changing?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Ambiguity",
+        question: "Describe a project where the requirements were unclear. How did you get to clarity?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Ambiguity",
+        question: "How do you balance moving fast vs. getting it right?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Anthropic - Ambiguity",
+        question: "Tell me about a time you were wrong. How did you handle it?",
+        targetWords: 120,
+        targetTime: 90
+    },
+
+    // ========================================
+    // ANTHROPIC - LLM TECHNICAL FLUENCY (8 questions)
+    // ========================================
+    {
+        category: "Anthropic - LLM Technical",
+        question: "How would you explain how LLMs work to a non-technical executive?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - LLM Technical",
+        question: "What are the biggest limitations of LLMs today?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - LLM Technical",
+        question: "What's RAG and when would you recommend it?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - LLM Technical",
+        question: "How do you evaluate whether an LLM solution is working?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - LLM Technical",
+        question: "How do you think about hallucination risk in enterprise deployments?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - LLM Technical",
+        question: "What's the difference between fine-tuning and prompt engineering?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - LLM Technical",
+        question: "Have you used our product? How does it compare to others?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - LLM Technical",
+        question: "What do you know about Constitutional AI?",
+        targetWords: 120,
+        targetTime: 90
+    },
+
+    // ========================================
+    // ANTHROPIC - TECHNICAL PROJECTS (6 questions)
+    // ========================================
+    {
+        category: "Anthropic - Technical Projects",
+        question: "Walk me through a technical project you led end-to-end.",
+        targetWords: 150,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Technical Projects",
+        question: "What was the hardest technical challenge on that project?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Technical Projects",
+        question: "What architecture decisions did you make and why?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Technical Projects",
+        question: "How did you work with data scientists and engineers?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Technical Projects",
+        question: "How did you measure success on a Data and AI implementation study?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Technical Projects",
+        question: "On a recent project you led, what would you do differently if you had to do it again?",
+        targetWords: 120,
+        targetTime: 90
+    },
+
+    // ========================================
+    // ANTHROPIC - STAKEHOLDER MANAGEMENT (5 questions)
+    // ========================================
+    {
+        category: "Anthropic - Stakeholders",
+        question: "Tell me about a time you had to align multiple senior stakeholders with competing priorities.",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Stakeholders",
+        question: "How do you handle pushback from a client who wants something you think is wrong?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Stakeholders",
+        question: "Describe a situation where you had to say no to a client or exec.",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Stakeholders",
+        question: "How do you build trust with a skeptical client?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Stakeholders",
+        question: "How do you manage a project when the client's internal politics are getting in the way?",
+        targetWords: 120,
+        targetTime: 90
+    },
+
+    // ========================================
+    // ANTHROPIC - TEAM COLLABORATION (5 questions)
+    // ========================================
+    {
+        category: "Anthropic - Team",
+        question: "How do you build credibility with engineers and data scientists?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Team",
+        question: "Tell me about a time you disagreed with a technical team's recommendation.",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Team",
+        question: "How do you handle a situation where the technical team is behind schedule?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Team",
+        question: "How do you translate business requirements into technical scope?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Team",
+        question: "How do you know when to push a team vs. when to trust their judgment?",
+        targetWords: 100,
+        targetTime: 75
+    },
+
+    // ========================================
+    // ANTHROPIC - PROJECT MANAGEMENT (5 questions)
+    // ========================================
+    {
+        category: "Anthropic - Project Mgmt",
+        question: "How do you run a complex, multi-workstream project?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Project Mgmt",
+        question: "What does your operating cadence look like on a typical engagement?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Project Mgmt",
+        question: "How do you track progress and surface risks?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Anthropic - Project Mgmt",
+        question: "Tell me about a time you had to recover a project that was off track.",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Project Mgmt",
+        question: "How do you ensure adoption after a solution goes live?",
+        targetWords: 120,
+        targetTime: 90
+    },
+
+    // ========================================
+    // ANTHROPIC - AI SAFETY & ENTERPRISE (3 questions)
+    // ========================================
+    {
+        category: "Anthropic - AI Safety",
+        question: "Why do you think safety matters in enterprise AI?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - AI Safety",
+        question: "What's your perspective on the risks of deploying LLMs in enterprise?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - AI Safety",
+        question: "A client has sensitive PII. How do you design the solution?",
+        targetWords: 120,
+        targetTime: 90
+    },
+
+    // ========================================
+    // ANTHROPIC - CASE SCENARIOS (7 questions)
+    // ========================================
+    {
+        category: "Anthropic - Case",
+        question: "How would you scope an LLM use case for a new client?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Case",
+        question: "What questions would you ask a client before recommending Claude?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Case",
+        question: "How do you think about build vs. buy for AI solutions?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Case",
+        question: "A client wants to deploy Claude for customer support in 4 weeks. How do you scope this?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Case",
+        question: "A client's LLM solution is hallucinating 15% of the time. What do you do?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Case",
+        question: "An exec wants to launch next week but evals aren't good enough. How do you handle it?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Case",
+        question: "The technical team says it's not possible. The client insists. What do you do?",
+        targetWords: 120,
+        targetTime: 90
+    },
+
+    // ========================================
+    // ANTHROPIC - PERSONAL FIT (7 questions)
+    // ========================================
+    {
+        category: "Anthropic - Personal",
+        question: "Tell me about a project that failed or underdelivered. What happened?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Anthropic - Personal",
+        question: "What's your biggest weakness?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Anthropic - Personal",
+        question: "What feedback have you received that was hard to hear?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Anthropic - Personal",
+        question: "How do you handle stress or high-pressure situations?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Anthropic - Personal",
+        question: "This role is 25-50% travel. How do you feel about that?",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Anthropic - Personal",
+        question: "What's your timeline? Other processes?",
+        targetWords: 80,
+        targetTime: 60
+    },
+    {
+        category: "Anthropic - Personal",
+        question: "What questions do you have for me?",
+        targetWords: 100,
+        targetTime: 75
     }
 ];
 

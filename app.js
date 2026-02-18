@@ -500,7 +500,7 @@ async function getRewrite() {
     const questionCategory = currentQuestion ? currentQuestion.category : 'General';
 
     // Determine which hiring manager persona to use based on question category
-    const isAppliedAI = ['Technical Leadership', 'Applied AI', 'Engineering Management', 'Technical Strategy'].includes(questionCategory);
+    const isAppliedAI = questionCategory.startsWith('Anthropic') || ['Technical Leadership', 'Applied AI', 'Engineering Management', 'Technical Strategy'].includes(questionCategory);
     const hiringManagerPersona = isAppliedAI
         ? 'Alena Fedorenko, Head of Applied AI at Anthropic - she values technical depth, clear thinking under ambiguity, ability to ship products with cross-functional teams, and strong judgment on AI safety and capabilities'
         : 'Mike Leeds, GTM leader at Databricks - he values crisp executive communication, data-driven insights, strategic thinking, and the ability to influence senior stakeholders';
