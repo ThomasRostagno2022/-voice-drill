@@ -1409,6 +1409,307 @@ const QUESTIONS = [
         question: "What questions do you have for me?",
         targetWords: 100,
         targetTime: 75
+    },
+
+    // ========================================
+    // DATABRICKS - CONSUMPTION MODEL DEEP-DIVE (10 questions)
+    // Persona: Mike Leeds, GTM leader at Databricks
+    // Focus: User was weaker here in round 1 — expect deeper probing
+    // ========================================
+    {
+        category: "Databricks - Consumption Model",
+        question: "Last time we talked about the consumption model. Walk me through the key differences between consumption-based and seat-based GTM motions.",
+        targetWords: 150,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Consumption Model",
+        question: "In a consumption model, how do you forecast revenue when usage is variable and unpredictable?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Consumption Model",
+        question: "How would you design a coverage model when revenue per account depends on usage rather than contract size?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Consumption Model",
+        question: "What signals would you use to identify accounts that are about to ramp usage vs. churn?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Consumption Model",
+        question: "How do you think about customer health in a consumption model vs. a traditional SaaS model?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Consumption Model",
+        question: "If a customer is paying $2M/year on consumption but only using 40% of their committed capacity, what do you do?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Consumption Model",
+        question: "How does the sales cycle differ when you're selling consumption vs. a fixed subscription?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Consumption Model",
+        question: "How do you set quotas and comp plans for reps selling a consumption product?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Consumption Model",
+        question: "What metrics would you put in a weekly operating review for a consumption-based business?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Consumption Model",
+        question: "How do you think about pricing optimization in a consumption model — what levers do you have?",
+        targetWords: 120,
+        targetTime: 90
+    },
+
+    // ========================================
+    // DATABRICKS - $5B TO $10B GROWTH STRATEGY (8 questions)
+    // Core of the role — expect Mike to push on specifics
+    // ========================================
+    {
+        category: "Databricks - Growth Strategy",
+        question: "You're owning the 3-year plan to take Databricks from $5B to $10B. Walk me through your first 90 days.",
+        targetWords: 150,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Growth Strategy",
+        question: "What are the top 3 levers to double revenue from $5B to $10B? How would you prioritize them?",
+        targetWords: 150,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Growth Strategy",
+        question: "How do you think about the relative contribution of new logo acquisition vs. expansion in getting from $5B to $10B?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Growth Strategy",
+        question: "Databricks is growing fast in data engineering. How would you evaluate whether AI/ML workloads are the bigger growth lever?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Growth Strategy",
+        question: "How would you size a growth opportunity — say, expanding into a new vertical or geography?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Growth Strategy",
+        question: "How do you distinguish between growth levers that are already working and need to scale vs. new bets that need to be proven?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Growth Strategy",
+        question: "The leadership team has a high-level plan. How do you go about detailing out the specific levers underneath it?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Growth Strategy",
+        question: "How would you present a growth strategy to the C-suite at Databricks? What's the structure?",
+        targetWords: 120,
+        targetTime: 90
+    },
+
+    // ========================================
+    // DATABRICKS - MODELLING & ANALYTICAL SKILLS (8 questions)
+    // HR flagged, not yet tested — high likelihood for round 2
+    // ========================================
+    {
+        category: "Databricks - Modelling",
+        question: "Walk me through how you'd build a model to project Databricks' revenue over the next 3 years.",
+        targetWords: 150,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Modelling",
+        question: "How would you decompose Databricks' revenue growth into its component drivers?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Modelling",
+        question: "You need to build a business case for investing in a new sales segment. What goes into your model?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Modelling",
+        question: "How do you model the impact of a pricing change on consumption revenue?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Modelling",
+        question: "What assumptions would you stress-test in a $5B to $10B growth model?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Modelling",
+        question: "Walk me through how you'd analyze rep productivity across different sales segments.",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Modelling",
+        question: "How would you model the ROI of hiring 200 more sales reps vs. investing in product-led growth?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Modelling",
+        question: "You have imperfect data and 2 weeks. How do you build a model the CRO will trust?",
+        targetWords: 120,
+        targetTime: 90
+    },
+
+    // ========================================
+    // DATABRICKS - STAKEHOLDER ALIGNMENT & EXEC PRESENCE (7 questions)
+    // HR flagged — expect this to be tested
+    // ========================================
+    {
+        category: "Databricks - Stakeholders",
+        question: "You've built a strategy that requires Sales, Product, and Marketing to change how they work. How do you get alignment?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Stakeholders",
+        question: "The CRO and CPO disagree on where to invest. Your analysis supports one side. How do you navigate this?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Stakeholders",
+        question: "How do you present a recommendation that challenges the current direction to a senior leadership team?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Stakeholders",
+        question: "You're presenting your growth strategy to Ali Ghodsi. He pushes back on your top lever. What do you do?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Stakeholders",
+        question: "How do you build relationships with VPs and GMs across the company in your first 60 days?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Stakeholders",
+        question: "Your analysis shows the EMEA team needs to restructure. The EMEA VP disagrees. How do you handle it?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Stakeholders",
+        question: "How do you ensure your strategy work doesn't just stay in a slide deck but actually gets executed?",
+        targetWords: 120,
+        targetTime: 90
+    },
+
+    // ========================================
+    // DATABRICKS - CROSS-FUNCTIONAL PARTNERSHIP (5 questions)
+    // HR flagged — working across Sales, Product, Marketing, Finance
+    // ========================================
+    {
+        category: "Databricks - Cross-Functional",
+        question: "This role requires partnering with Sales, Product, Marketing, and Finance. How do you build credibility with each?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Cross-Functional",
+        question: "Product wants to invest in a feature that doesn't align with your growth thesis. How do you handle it?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Cross-Functional",
+        question: "How do you work with the Finance team to align on revenue targets and assumptions?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Cross-Functional",
+        question: "Sales leadership wants more resources but your analysis shows the bottleneck is elsewhere. How do you communicate this?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Cross-Functional",
+        question: "How do you balance the needs of the field organization vs. the long-term strategic plan?",
+        targetWords: 120,
+        targetTime: 90
+    },
+
+    // ========================================
+    // DATABRICKS - ROLE FIT & RESEARCH MINDSET (7 questions)
+    // Mike mentioned the work is more like research papers
+    // ========================================
+    {
+        category: "Databricks - Role Fit",
+        question: "Mike mentioned this role's output is more like research papers than exec presentations. How does that sit with you coming from McKinsey?",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Role Fit",
+        question: "What concerns do you have about this role that you'd want to discuss?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Databricks - Role Fit",
+        question: "How do you go deep on a topic you don't know well? Give me an example.",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Role Fit",
+        question: "What's the hardest analytical problem you've ever worked on? Walk me through your approach.",
+        targetWords: 150,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Role Fit",
+        question: "How do you know when your analysis is 'good enough' vs. when you need to keep digging?",
+        targetWords: 100,
+        targetTime: 75
+    },
+    {
+        category: "Databricks - Role Fit",
+        question: "Tell me about a time you changed a leadership team's strategic direction based on your analysis.",
+        targetWords: 120,
+        targetTime: 90
+    },
+    {
+        category: "Databricks - Role Fit",
+        question: "What questions do you wish I'd asked you in our first conversation?",
+        targetWords: 100,
+        targetTime: 75
     }
 ];
 
